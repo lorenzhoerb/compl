@@ -1,0 +1,23 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+
+#include "gentree.h"
+%}
+
+%term ASSIGN=1
+
+%%
+reg:	ASSIGN(reg,reg)     # 1 # printf("movq %s, %s\n",kids[1]->regname, kids[0]->regname);
+
+%%
+
+extern treenode *root;
+extern int yyparse(void);
+void burm_reduce(NODEPTR_TYPE bnode, int goalnt);
+
+void invoke_burm(NODEPTR_TYPE root) {
+    burm_label(root);
+    burm_reduce(root, 1);
+}
