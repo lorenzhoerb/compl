@@ -6,10 +6,15 @@
 #include "gentree.h"
 %}
 
-%term ASSIGN=1
+%start num
+%term OP_REG = 1 OP_NUM = 2 OP_ID = 3 OP_ADD = 4
 
 %%
-reg:	ASSIGN(reg,reg)     # 1 # printf("movq %s, %s\n",kids[1]->regname, kids[0]->regname);
+
+num: OP_ADD(num, num)   # 1 # printf("Calculate: %d + %d = %d\n", kids[0]->val, kids[1]->val, kids[0]->val + kids[1] ->val); bnode->val=kids[0]->val + kids[1]->val;
+
+
+num:	OP_NUM     # 1 # printf("i am a register\n");
 
 %%
 

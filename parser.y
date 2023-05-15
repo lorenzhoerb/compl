@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "symt.h"
 #include "gentree.h"
+#include "assembly.h"
 
 int yylex(void);
 int yyerror(char* s);
@@ -20,9 +21,10 @@ extern void invoke_burm(NODEPTR_TYPE root);
 
 @attributes { char* id; unsigned lineNr; } ID
 @attributes { unsigned n; } NUM
-@attributes { struct symbol_table *symtab;} class method
+@attributes { struct symbol_table *symtab; struct selector_list *sl;} class 
 @attributes { struct symbol_table *symtab; int returnType;} guarded guarded_list cond 
 @attributes { struct symbol_table *symtab;} expr_list
+@attributes { struct symbol_table *symtab; char *className;} method
 @attributes { int bt;} type notexpr
 @attributes { struct symbol_table *symtab; int bt;} term expr orexpr multexpr addexpr 
 @attributes { struct type_list *tl;} type_list
@@ -31,9 +33,9 @@ extern void invoke_burm(NODEPTR_TYPE root);
 @attributes { struct symbol_table *symtab; int bt; struct symbol_table *symtab_out;} par
 
 @attributes { struct symbol_table *symtab; struct symbol_table *symtab_out;} selector
-@attributes { struct symbol_table *symtab; struct symbol_table *out;} program
+@attributes { struct symbol_table *symtab; struct symbol_table *out; struct selector_list *sl;} program
 @attributes { struct symbol_table *symtab;} start
-@attributes { struct symbol_table *symtab; struct symbol_table *up;} member_list 
+@attributes { struct symbol_table *symtab; struct symbol_table *up; char *className;} member_list 
 
 @attributes { struct symbol_table *symtab; struct symbol_table *symtab_out; int returnType;} stat 
 
@@ -49,6 +51,7 @@ start: program
 	@{
 		@i @start.symtab@ = @program.symtab@;
 		@i @program.out@ = @start.symtab@;
+		@i @program.sl@ = get_selectors(@start.symtab@);
 	@}
 	;
 
@@ -63,14 +66,17 @@ program:
 		@i @program.0.symtab@ = @selector.symtab_out@;
 
 		@i @program.1.out@ = @program.0.out@;
-
+		@i @program.1.sl@ = @program.0.sl@;
 	@}
-	| program class ';' 
+	| program class ';'
 	@{
 		@i @program.0.symtab@ = @program.1.symtab@;
 
 		@i @program.1.out@ = @program.0.out@;
 		@i @class.symtab@ = @program.0.out@;
+
+		@i @program.1.sl@ = @program.0.sl@;
+		@i @class.0.sl@ = @program.0.sl@;
 	@}
 	;
 
@@ -83,6 +89,8 @@ selector: type ID LEFT_PAREN OBJECT type_list RIGHT_PAREN
 class: CLASS ID member_list END
 	@{
 		@i @member_list.symtab@ = symtab_namespace(symtab_insert(@class.symtab@, @ID.id@, CLASS_NAME, NULL, @ID.lineNr@));
+		@i @member_list.className@ = @ID.id@;
+		@codegen defineClassSection(@ID.id@, @class.0.sl@->selectors, @class.0.sl@->size);
 	@}
 	;
 
@@ -96,12 +104,16 @@ member_list:
 		@i @member_list.1.symtab@ = symtab_insert(@member_list.0.symtab@, @ID.id@, OBJ_VAR, complex_type_init(@type.bt@, NULL), @ID.lineNr@);
 
 		@i @member_list.0.up@ = @member_list.1.up@;
+		@i @member_list.1.className@ = @member_list.0.className@;
 	@}
 	| member_list method ';'
 	@{
 		@i @member_list.1.symtab@ = @member_list.0.symtab@;
 		@i @member_list.0.up@ = @member_list.1.up@;
 		@i @method.symtab@ = @member_list.1.up@;
+
+		@i @member_list.1.className@ = @member_list.0.className@;
+		@i @method.className@ = @member_list.0.className@;
 	@}
 	;
 
@@ -117,7 +129,10 @@ method: type ID LEFT_PAREN pars RIGHT_PAREN stats return END
 		@i @stats.returnType@ = @type.bt@;
 
 
-		@codegen symtab_check_method_impl(@method.symtab@, @ID.id@, complex_type_init(@type.bt@, @pars.tl@), @ID.lineNr@);
+		@codegen {
+			symtab_check_method_impl(@method.symtab@, @ID.id@, complex_type_init(@type.bt@, @pars.tl@), @ID.lineNr@);
+			implementMethod(@method.className@, @ID.id@);
+		}
 	@}
 	;
 
@@ -249,7 +264,10 @@ return: RETURN expr
 	@{
 		@i @expr.symtab@ = @return.symtab@;
 
-		@codegen is_return_valid(@return.returnType@, @expr.bt@);
+		@codegen {
+			is_return_valid(@return.returnType@, @expr.bt@);
+			genReturn();
+		}
 	@}
 	;
 

@@ -1,0 +1,7 @@
+int a(object, int, int);
+
+class c1
+int kek;
+int a(object o, int i, int j)
+return 0 end;
+end;

@@ -1,6 +1,5 @@
 #ifndef GENTREE
 #define GENTREE
-
 #ifdef USE_IBURG
 #ifndef BURM
 typedef struct burm_state *STATEPTR_TYPE;
@@ -9,11 +8,15 @@ typedef struct burm_state *STATEPTR_TYPE;
 #define STATEPTR_TYPE int
 #endif
 
+#include <stdlib.h>
+#include <stdio.h>
+
 typedef struct s_node {
     int op;
     struct s_node *kids[2];
     STATEPTR_TYPE state;
     char *regname;
+    char *id;
     int val;
 } treenode;
 
@@ -29,10 +32,13 @@ typedef treenode *treenodep;
 treenode *newOperatorNode(int op, treenode *left, treenode *right);
 treenode *newRegisterNode(char* regname);
 treenode *newNumNode(long num);
+treenode *newIdNode(char *id);
 
 enum {
-    OP_REG,
-    OP_NUM
+    OP_REG = 1,
+    OP_NUM = 2,
+    OP_ID = 3,
+    OP_ADD = 4
 };
 
 #endif

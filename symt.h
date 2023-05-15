@@ -22,6 +22,11 @@ typedef struct symbol_table {
   sym_entry *last;
 } symtab;
 
+struct selector_list {
+    char **selectors;
+    size_t size;
+};
+
 typedef struct symbol_iterator {
   struct symbol_table *symtab;
   struct symbol_entry *current;
@@ -42,6 +47,7 @@ struct complex_type {
  */
 symtab *symtab_init();
 
+struct selector_list *get_selectors(symtab *symtab);
 
 void is_return_valid(enum basic_type returnType, enum basic_type expr_type);
 

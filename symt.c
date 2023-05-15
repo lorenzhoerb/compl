@@ -334,3 +334,24 @@ void symtab_print(symtab *symtab) {
     printf("]\n");
   }
 }
+
+struct selector_list *get_selectors(symtab *symtab) {
+  symtab_itr *itr = symtab_iter(symtab);
+  sym_entry *entry;
+
+  struct selector_list *sl = (struct selector_list*) malloc(sizeof(struct selector_list));
+  sl->size = 0;
+  sl->selectors = (char**) malloc(sizeof(char*));
+
+  for (entry = symtab_next(itr); entry != NULL; entry = symtab_next(itr)) {
+    if(entry->kind == METHOD) {
+      if(sl->size == 0) {
+        sl->selectors[sl->size++] = entry->name;
+      } else {
+        sl->selectors = (char**) realloc(sl->selectors, sizeof(char*) + sl->size + 1);
+        sl->selectors[sl->size++] = entry->name;
+      }
+    }
+  }
+  return sl;
+}
