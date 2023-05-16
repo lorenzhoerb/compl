@@ -516,7 +516,7 @@ type:
 
 int yyerror(char *e)
 {
-	printf("Parser error: '%s'...\n", e);
+	printf("Parser error: '%s'\n", e);
 	exit(2);
 }
 
