@@ -1,9 +1,8 @@
 int x(object);
-class b 
-int x(object y) 
-1+1;
-2+2;
-3+3;
-4+5;
-return 1 end;
+class a
+  int x(object y)
+    cond -> int z<-0; return z; continue;
+         -> object z<-y; break;
+    end;
+  return 0 end;
 end;

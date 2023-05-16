@@ -43,6 +43,7 @@ extern void invoke_burm(NODEPTR_TYPE root);
 @attributes { struct symbol_table *symtab; int returnType;} return
 
 @attributes { struct symbol_table *symtab; int returnType; struct s_node *n;} stats
+@attributes {struct symbol_table *symtab; int returnType; } m_stat_list  g_stat_list
 
 @traversal @preorder codegen
 @traversal @postorder codegenpost
@@ -123,11 +124,8 @@ method: type ID LEFT_PAREN pars RIGHT_PAREN m_stat_list
 	@{
 		@i @pars.symtab@ = symtab_namespace(@method.symtab@);
 
-		@i @stats.symtab@ = @pars.symtab_out@;
-		@i @stats.returnType@ = @type.bt@;
-
-		@i @return.symtab@ = @stats.symtab@;
-		@i @return.returnType@ = @type.bt@;
+		@i @m_stat_list.symtab@ = @pars.symtab_out@;
+		@i @m_stat_list.returnType@ = @type.bt@;
 
 		@codegen {
 			symtab_check_method_impl(@method.symtab@, @ID.id@, complex_type_init(@type.bt@, @pars.tl@), @ID.lineNr@);
@@ -167,27 +165,30 @@ par: type ID
 
 m_stat_list:
 	return END
-	| stat ';' stats
+	@{
+		@i @return.returnType@ = @m_stat_list.returnType@;
+		@i @return.symtab@ = @m_stat_list.symtab@;
+	@}
+	| stat ';' m_stat_list
+	@{
+		@i @stat.symtab@ = @m_stat_list.0.symtab@;
+		@i @stat.returnType@ = @m_stat_list.returnType@;
+		@i @m_stat_list.1.symtab@ = @stat.symtab_out@;
+		@i @m_stat_list.1.returnType@ = @m_stat_list.0.returnType@;
+		@codegen if(@stat.n@ != NULL) invoke_burm(@stat.n@);
+	@}
 	;
 
 g_stat_list:
-	CONTINUE
-	| BREAK
-	| stat ';' stats
-	;
-
-stats:
-	| stats stat ';' 
+	escape
+	| stat ';' g_stat_list
 	@{
-		@i @stat.0.symtab@ = @stats.0.symtab@;
-		@i @stats.1.symtab@ = @stat.0.symtab_out@;
-
-		@i @stats.1.returnType@ = @stats.0.returnType@;
-		@i @stat.returnType@ = @stats.0.returnType@;
-		@i @stats.0.n@ = @stat.n@;
-	
-		@codegen if(@stat.n@ != NULL) invoke_burm(@stat.n@);
-	@}	
+		@i @stat.returnType@ = @g_stat_list.returnType@; 
+		@i @g_stat_list.1.returnType@ = @g_stat_list.0.returnType@;
+		@i @stat.symtab@ = @g_stat_list.0.symtab@;
+		@i @g_stat_list.1.symtab@ = @stat.symtab_out@;
+		
+	@}
 	;
 
 stat: 
@@ -242,7 +243,7 @@ guarded_list:
 	/* empty */
 	| guarded_list guarded ';' 
 	@{
-		@i @guarded.symtab@ = @guarded_list.0.symtab@;
+		@i @guarded.symtab@ = symtab_namespace(@guarded_list.0.symtab@);
 		@i @guarded_list.1.symtab@ = @guarded_list.0.symtab@;
 
 		@i @guarded_list.1.returnType@ = @guarded_list.0.returnType@;
@@ -251,12 +252,12 @@ guarded_list:
 	;
 
 guarded:
-	expr ARROW stats escape
+	expr ARROW g_stat_list
 	@{
-		@i @stats.symtab@ = @guarded.symtab@;
+		@i @g_stat_list.symtab@ = @guarded.symtab@;
 		@i @expr.symtab@ = @guarded.symtab@;
 
-		@i @stats.returnType@ = @guarded.returnType@;
+		@i @g_stat_list.returnType@ = @guarded.returnType@;
 
 		@codegen {
 			if(@expr.bt@ != INT_T) {
@@ -265,11 +266,11 @@ guarded:
 			}
 		};
 	@}
-	| ARROW stats escape
+	| ARROW g_stat_list
 	@{
-		@i @stats.symtab@ = @guarded.symtab@;
+		@i @g_stat_list.symtab@ = @guarded.symtab@;
 
-		@i @stats.returnType@ = @guarded.returnType@;
+		@i @g_stat_list.returnType@ = @guarded.returnType@;
 	@}
 	;
 

@@ -702,6 +702,13 @@ struct yyyT19 {
 
 };
 
+struct yyyT20 {
+#line 46 "parser.y"
+struct symbol_table *symtab; int returnType;
+#line 203 "oxout.l"
+
+};
+
 #if defined (__cplusplus)
 #include <cstring>
 #include <new>
@@ -727,6 +734,7 @@ union yyyAttrbs {
   struct yyyT17 yyyAttrb17;
   struct yyyT18 yyyAttrb18;
   struct yyyT19 yyyAttrb19;
+  struct yyyT20 yyyAttrb20;
 };
 
 #if defined (__cplusplus)
@@ -777,10 +785,10 @@ typedef struct yyyGenNode yyyGNT;
 extern void yyyGenLeaf (int, int, long, long, YYSTYPE *);
 extern void yyyabort (void);
 extern bool yyyYok;
-#line 781 "lex.yy.c"
-#line 276 "oxout.l"
+#line 789 "lex.yy.c"
+#line 284 "oxout.l"
  #line 18 "scanner.l"
-#line 784 "lex.yy.c"
+#line 792 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -1000,16 +1008,16 @@ YY_DECL
 		}
 
 	{
-#line 277 "oxout.l"
+#line 285 "oxout.l"
 
- #line 278 "oxout.l"
+ #line 286 "oxout.l"
 
 
 	yyyinit(); /* initialize the Ox-generated evaluator */
 
  #line 18 "scanner.l"
 
-#line 1013 "lex.yy.c"
+#line 1021 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1079,343 +1087,343 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 285 "oxout.l"
+#line 293 "oxout.l"
 {if(yyyYok){
- #line 286 "oxout.l"
+ #line 294 "oxout.l"
 yyyGenLeaf(0,0,0,0,&yylval);}
  #line 19 "scanner.l"
 return (',');}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 290 "oxout.l"
+#line 298 "oxout.l"
 {if(yyyYok){
- #line 291 "oxout.l"
+ #line 299 "oxout.l"
 yyyGenLeaf(0,0,0,0,&yylval);}
  #line 20 "scanner.l"
 return (';');}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 295 "oxout.l"
+#line 303 "oxout.l"
 {
- #line 296 "oxout.l"
+ #line 304 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 21 "scanner.l"
 return LEFT_PAREN;
- #line 300 "oxout.l"
+ #line 308 "oxout.l"
 }
  #line 21 "scanner.l"
 }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 304 "oxout.l"
+#line 312 "oxout.l"
 {
- #line 305 "oxout.l"
+ #line 313 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 22 "scanner.l"
 return RIGHT_PAREN;
- #line 309 "oxout.l"
+ #line 317 "oxout.l"
 }
  #line 22 "scanner.l"
 }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 313 "oxout.l"
+#line 321 "oxout.l"
 {
- #line 314 "oxout.l"
+ #line 322 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 23 "scanner.l"
 return ASSIGN;
- #line 318 "oxout.l"
+ #line 326 "oxout.l"
 }
  #line 23 "scanner.l"
 }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 322 "oxout.l"
+#line 330 "oxout.l"
 {
- #line 323 "oxout.l"
+ #line 331 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 24 "scanner.l"
 return ARROW;
- #line 327 "oxout.l"
+ #line 335 "oxout.l"
 }
  #line 24 "scanner.l"
 }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 331 "oxout.l"
+#line 339 "oxout.l"
 {
- #line 332 "oxout.l"
+ #line 340 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 25 "scanner.l"
 return MINUS;
- #line 336 "oxout.l"
+ #line 344 "oxout.l"
 }
  #line 25 "scanner.l"
 }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 340 "oxout.l"
+#line 348 "oxout.l"
 {
- #line 341 "oxout.l"
+ #line 349 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 26 "scanner.l"
 return PLUS;
- #line 345 "oxout.l"
+ #line 353 "oxout.l"
 }
  #line 26 "scanner.l"
 }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 349 "oxout.l"
+#line 357 "oxout.l"
 {
- #line 350 "oxout.l"
+ #line 358 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 27 "scanner.l"
 return MULTIPLY;
- #line 354 "oxout.l"
+ #line 362 "oxout.l"
 }
  #line 27 "scanner.l"
 }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 358 "oxout.l"
+#line 366 "oxout.l"
 {
- #line 359 "oxout.l"
+ #line 367 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 28 "scanner.l"
 return GREATER_THAN;
- #line 363 "oxout.l"
+ #line 371 "oxout.l"
 }
  #line 28 "scanner.l"
 }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 367 "oxout.l"
+#line 375 "oxout.l"
 {
- #line 368 "oxout.l"
+ #line 376 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 29 "scanner.l"
 return HASH;
- #line 372 "oxout.l"
+ #line 380 "oxout.l"
 }
  #line 29 "scanner.l"
 }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 377 "oxout.l"
+#line 385 "oxout.l"
 {
- #line 378 "oxout.l"
+ #line 386 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 31 "scanner.l"
 return OBJECT;
- #line 382 "oxout.l"
+ #line 390 "oxout.l"
 }
  #line 31 "scanner.l"
 }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 386 "oxout.l"
+#line 394 "oxout.l"
 {
- #line 387 "oxout.l"
+ #line 395 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 32 "scanner.l"
 return INT;
- #line 391 "oxout.l"
+ #line 399 "oxout.l"
 }
  #line 32 "scanner.l"
 }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 395 "oxout.l"
+#line 403 "oxout.l"
 {
- #line 396 "oxout.l"
+ #line 404 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 33 "scanner.l"
 return CLASS;
- #line 400 "oxout.l"
+ #line 408 "oxout.l"
 }
  #line 33 "scanner.l"
 }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 404 "oxout.l"
+#line 412 "oxout.l"
 {
- #line 405 "oxout.l"
+ #line 413 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 34 "scanner.l"
 return END;
- #line 409 "oxout.l"
+ #line 417 "oxout.l"
 }
  #line 34 "scanner.l"
 }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 413 "oxout.l"
+#line 421 "oxout.l"
 {
- #line 414 "oxout.l"
+ #line 422 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 35 "scanner.l"
 return RETURN;
- #line 418 "oxout.l"
+ #line 426 "oxout.l"
 }
  #line 35 "scanner.l"
 }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 422 "oxout.l"
+#line 430 "oxout.l"
 {
- #line 423 "oxout.l"
+ #line 431 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 36 "scanner.l"
 return COND;
- #line 427 "oxout.l"
+ #line 435 "oxout.l"
 }
  #line 36 "scanner.l"
 }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 431 "oxout.l"
+#line 439 "oxout.l"
 {
- #line 432 "oxout.l"
+ #line 440 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 37 "scanner.l"
 return CONTINUE;
- #line 436 "oxout.l"
+ #line 444 "oxout.l"
 }
  #line 37 "scanner.l"
 }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 440 "oxout.l"
+#line 448 "oxout.l"
 {
- #line 441 "oxout.l"
+ #line 449 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 38 "scanner.l"
 return BREAK;
- #line 445 "oxout.l"
+ #line 453 "oxout.l"
 }
  #line 38 "scanner.l"
 }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 449 "oxout.l"
+#line 457 "oxout.l"
 {
- #line 450 "oxout.l"
+ #line 458 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 39 "scanner.l"
 return NOT;
- #line 454 "oxout.l"
+ #line 462 "oxout.l"
 }
  #line 39 "scanner.l"
 }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 458 "oxout.l"
+#line 466 "oxout.l"
 {
- #line 459 "oxout.l"
+ #line 467 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 40 "scanner.l"
 return NULLKEY;
- #line 463 "oxout.l"
+ #line 471 "oxout.l"
 }
  #line 40 "scanner.l"
 }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 467 "oxout.l"
+#line 475 "oxout.l"
 {
- #line 468 "oxout.l"
+ #line 476 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 41 "scanner.l"
 return NEW;
- #line 472 "oxout.l"
+ #line 480 "oxout.l"
 }
  #line 41 "scanner.l"
 }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 476 "oxout.l"
+#line 484 "oxout.l"
 {
- #line 477 "oxout.l"
+ #line 485 "oxout.l"
 {if(yyyYok){yyyGenLeaf(0,0,0,0,&yylval);}
  #line 42 "scanner.l"
 return OR;
- #line 481 "oxout.l"
+ #line 489 "oxout.l"
 }
  #line 42 "scanner.l"
 }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 487 "oxout.l"
+#line 495 "oxout.l"
 {if(yyyYok){
- #line 488 "oxout.l"
+ #line 496 "oxout.l"
 yyyGenLeaf(1,2,0,1,&yylval);
  #line 45 "scanner.l"
- #line 491 "oxout.l"
+ #line 499 "oxout.l"
 yylval.yyyOxAttrbs.semEl->node->yyyAttrbs.yyyAttrb2.n
  #line 45 "scanner.l"
  = transformNum(yytext, 16);
- #line 495 "oxout.l"
+ #line 503 "oxout.l"
 }
  #line 45 "scanner.l"
 return (NUM);}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 499 "oxout.l"
+#line 507 "oxout.l"
 {if(yyyYok){
- #line 500 "oxout.l"
+ #line 508 "oxout.l"
 yyyGenLeaf(1,2,0,1,&yylval);
  #line 46 "scanner.l"
- #line 503 "oxout.l"
+ #line 511 "oxout.l"
 yylval.yyyOxAttrbs.semEl->node->yyyAttrbs.yyyAttrb2.n
  #line 46 "scanner.l"
  = transformNum(yytext, 10);
- #line 507 "oxout.l"
+ #line 515 "oxout.l"
 }
  #line 46 "scanner.l"
 return (NUM);}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 511 "oxout.l"
+#line 519 "oxout.l"
 {if(yyyYok){
- #line 512 "oxout.l"
+ #line 520 "oxout.l"
 yyyGenLeaf(2,1,1,3,&yylval);
  #line 47 "scanner.l"
- #line 515 "oxout.l"
+ #line 523 "oxout.l"
 yylval.yyyOxAttrbs.semEl->node->yyyAttrbs.yyyAttrb1.id
  #line 47 "scanner.l"
  = strdup(yytext);
- #line 519 "oxout.l"
+ #line 527 "oxout.l"
 yylval.yyyOxAttrbs.semEl->node->yyyAttrbs.yyyAttrb1.lineNr
  #line 47 "scanner.l"
  = yylineno;
- #line 523 "oxout.l"
+ #line 531 "oxout.l"
 }
  #line 47 "scanner.l"
 return (ID);}
@@ -1425,26 +1433,26 @@ case 27:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
-#line 527 "oxout.l"
+#line 535 "oxout.l"
 ;
 	YY_BREAK
 case 28:
 /* rule 28 can match eol */
 YY_RULE_SETUP
-#line 528 "oxout.l"
+#line 536 "oxout.l"
 ;
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 529 "oxout.l"
+#line 537 "oxout.l"
 lexicalError();
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 530 "oxout.l"
+#line 538 "oxout.l"
 ECHO;
 	YY_BREAK
-#line 1448 "lex.yy.c"
+#line 1456 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2463,7 +2471,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 530 "oxout.l"
+#line 538 "oxout.l"
 
 
 int yywrap(){}
