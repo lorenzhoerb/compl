@@ -1,6 +1,9 @@
-int a(object, int, int);
-
-class c1
-int a(object o, int i, int j)
-return 0 end;
+int x(object);
+class b 
+int x(object y) 
+1+1;
+2+2;
+3+3;
+4+5;
+return 1 end;
 end;

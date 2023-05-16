@@ -585,7 +585,7 @@ struct yyyT2 {
 
 struct yyyT3 {
 #line 24 "parser.y"
- struct symbol_table *symtab; struct selector_list *sl;
+ struct symbol_table *symtab; struct symbol_table *symtab_in; struct symbol_table *symtab_out; struct selector_list *sl;
 #line 84 "oxout.l"
 
 };
@@ -697,7 +697,7 @@ struct yyyT18 {
 
 struct yyyT19 {
 #line 45 "parser.y"
- struct symbol_table *symtab; int returnType;
+ struct symbol_table *symtab; int returnType; struct s_node *n;
 #line 196 "oxout.l"
 
 };

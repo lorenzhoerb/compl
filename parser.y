@@ -21,7 +21,7 @@ extern void invoke_burm(NODEPTR_TYPE root);
 
 @attributes { char* id; unsigned lineNr; } ID
 @attributes { unsigned n; } NUM
-@attributes { struct symbol_table *symtab; struct selector_list *sl;} class 
+@attributes { struct symbol_table *symtab; struct symbol_table *symtab_in; struct symbol_table *symtab_out; struct selector_list *sl;} class 
 @attributes { struct symbol_table *symtab; int returnType;} guarded guarded_list cond 
 @attributes { struct symbol_table *symtab;} expr_list
 @attributes { struct symbol_table *symtab; char *className;} method
@@ -42,7 +42,7 @@ extern void invoke_burm(NODEPTR_TYPE root);
 
 @attributes { struct symbol_table *symtab; int returnType;} return
 
-@attributes { struct symbol_table *symtab; int returnType;} stats
+@attributes { struct symbol_table *symtab; int returnType; struct s_node *n;} stats
 
 @traversal @preorder codegen
 @traversal @postorder codegenpost
@@ -71,10 +71,10 @@ program:
 	@}
 	| program class ';'
 	@{
-		@i @program.0.symtab@ = @program.1.symtab@;
-
+		@i @class.symtab@ = @program.1.symtab@;
+		@i @program.0.symtab@ = @class.symtab_out@;
+		@i @class.symtab_in@ = @program.out@;
 		@i @program.1.out@ = @program.0.out@;
-		@i @class.symtab@ = @program.0.out@;
 
 		@i @program.1.sl@ = @program.0.sl@;
 		@i @class.0.sl@ = @program.0.sl@;
@@ -89,7 +89,8 @@ selector: type ID LEFT_PAREN OBJECT type_list RIGHT_PAREN
 
 class: CLASS ID member_list END
 	@{
-		@i @member_list.symtab@ = symtab_namespace(symtab_insert(@class.symtab@, @ID.id@, CLASS_NAME, NULL, @ID.lineNr@));
+		@i @class.symtab_out@ = symtab_insert(@class.symtab@, @ID.id@, CLASS_NAME, NULL, @ID.lineNr@);
+		@i @member_list.symtab@ = symtab_namespace(@class.symtab_in@);
 		@i @member_list.className@ = @ID.id@;
 		@codegen defineClassSection(@ID.id@, @class.0.sl@->selectors, @class.0.sl@->size);
 	@}
@@ -118,17 +119,15 @@ member_list:
 	@}
 	;
 
-method: type ID LEFT_PAREN pars RIGHT_PAREN stats return END
+method: type ID LEFT_PAREN pars RIGHT_PAREN m_stat_list
 	@{
 		@i @pars.symtab@ = symtab_namespace(@method.symtab@);
 
 		@i @stats.symtab@ = @pars.symtab_out@;
-
-		@i @return.symtab@ = @stats.symtab@;
-
-		@i @return.returnType@ = @type.bt@;
 		@i @stats.returnType@ = @type.bt@;
 
+		@i @return.symtab@ = @stats.symtab@;
+		@i @return.returnType@ = @type.bt@;
 
 		@codegen {
 			symtab_check_method_impl(@method.symtab@, @ID.id@, complex_type_init(@type.bt@, @pars.tl@), @ID.lineNr@);
@@ -166,16 +165,27 @@ par: type ID
 	@}
 	;
 
+m_stat_list:
+	return END
+	| stat ';' stats
+	;
+
+g_stat_list:
+	CONTINUE
+	| BREAK
+	| stat ';' stats
+	;
+
 stats:
-	/* empty */
 	| stats stat ';' 
 	@{
-		@i @stats.1.symtab@ = @stats.0.symtab@;
 		@i @stat.0.symtab@ = @stats.0.symtab@;
+		@i @stats.1.symtab@ = @stat.0.symtab_out@;
 
 		@i @stats.1.returnType@ = @stats.0.returnType@;
 		@i @stat.returnType@ = @stats.0.returnType@;
-		
+		@i @stats.0.n@ = @stat.n@;
+	
 		@codegen if(@stat.n@ != NULL) invoke_burm(@stat.n@);
 	@}	
 	;

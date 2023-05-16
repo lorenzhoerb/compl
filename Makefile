@@ -1,4 +1,4 @@
-NAME=codea
+NAME=ag
 LEX=flex
 OBJECTS = lex.yy.o oxout.tab.o symt.o $(NAME)_iburg.o gentree.o assembly.o
 
