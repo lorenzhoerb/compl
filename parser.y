@@ -320,7 +320,7 @@ expr:
 		@i @term.1.symtab@ = @expr.symtab@;
 
 		@i @expr.bt@ = INT_T;
-		@i @expr.n@ = NULL;
+		@i @expr.n@ = newOperatorNode(OP_GREATER, @term.0.n@, @term.1.n@);
 		@codegen check_binop_types(@term.0.bt@, @term.1.bt@);
 	@}
 	| term HASH term
