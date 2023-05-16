@@ -25,9 +25,10 @@ extern void invoke_burm(NODEPTR_TYPE root);
 @attributes { struct symbol_table *symtab; int returnType;} guarded guarded_list cond 
 @attributes { struct symbol_table *symtab;} expr_list
 @attributes { struct symbol_table *symtab; char *className;} method
-@attributes { int bt;} type notexpr
-@attributes { struct symbol_table *symtab; int bt;} term expr orexpr multexpr addexpr 
+@attributes { int bt;} type
+@attributes { int bt; struct s_node *n;} notexpr
 @attributes { struct type_list *tl;} type_list
+@attributes { struct symbol_table *symtab; int bt; struct s_node *n;} term addexpr expr multexpr orexpr 
 
 @attributes {struct type_list *tl; struct symbol_table *symtab; struct symbol_table *symtab_out;} pars
 @attributes { struct symbol_table *symtab; int bt; struct symbol_table *symtab_out;} par
@@ -37,7 +38,7 @@ extern void invoke_burm(NODEPTR_TYPE root);
 @attributes { struct symbol_table *symtab;} start
 @attributes { struct symbol_table *symtab; struct symbol_table *up; char *className;} member_list 
 
-@attributes { struct symbol_table *symtab; struct symbol_table *symtab_out; int returnType;} stat 
+@attributes { struct symbol_table *symtab; struct symbol_table *symtab_out; int returnType; struct s_node *n;} stat 
 
 @attributes { struct symbol_table *symtab; int returnType;} return
 
@@ -174,6 +175,8 @@ stats:
 
 		@i @stats.1.returnType@ = @stats.0.returnType@;
 		@i @stat.returnType@ = @stats.0.returnType@;
+		
+		@codegen if(@stat.n@ != NULL) invoke_burm(@stat.n@);
 	@}	
 	;
 
@@ -184,6 +187,7 @@ stat:
 		@i @stat.symtab_out@ = @stat.symtab@;
 
 		@i @return.returnType@ = @stat.returnType@;
+		@i @stat.n@ = NULL;
 	@}
 	| cond
 	@{
@@ -191,6 +195,7 @@ stat:
 		@i @stat.symtab_out@ = @stat.symtab@;
 
 		@i @cond.returnType@ = @stat.returnType@;
+		@i @stat.n@ = NULL;
 	@}
 	| type ID ASSIGN expr
 	@{
@@ -198,17 +203,20 @@ stat:
 
 		@codegen symtab_check_assign(@stat.symtab@, @ID.id@, @expr.bt@, @ID.lineNr@);
 		@i @expr.symtab@ = @stat.symtab@;
+		@i @stat.n@ = NULL;
 	@}
 	| ID ASSIGN expr
 	@{
 		@codegen symtab_check_assign(@stat.symtab@, @ID.id@, @expr.bt@, @ID.lineNr@);
 		@i @expr.symtab@ = @stat.symtab@;
 		@i @stat.symtab_out@ = @stat.symtab@;
+		@i @stat.n@ = NULL;
 	@}
 	| expr
 	@{
 		@i @expr.symtab@ = @stat.symtab@;
 		@i @stat.symtab_out@ = @stat.symtab@;
+		@i @stat.n@ = @expr.n@;
 	@}
 	;
 
@@ -278,6 +286,8 @@ expr:
 
 		@i @expr.bt@ = INT_T;
 
+		@i @expr.n@ = newOperatorNode(OP_UNARY, @notexpr.n@, @term.n@);
+
 		@codegen {
 			if(@term.bt@ != INT_T)
 			fprintf(stderr, "Invalid type for not operator\n"); exit(3);
@@ -288,18 +298,21 @@ expr:
 		@i @addexpr.symtab@ = @expr.symtab@;
 
 		@i @expr.bt@ = INT_T;
+		@i @expr.n@ = @addexpr.n@;
 	@}
 	| multexpr
 	@{
 		@i @multexpr.symtab@ = @expr.symtab@;
 
 		@i @expr.bt@ = INT_T;
+		@i @expr.n@ = @multexpr.n@;
 	@}
 	| orexpr
 	@{
 		@i @orexpr.symtab@ = @expr.symtab@;
 
 		@i @expr.bt@ = INT_T;
+		@i @expr.n@ = @orexpr.n@;
 	@}
 	| term GREATER_THAN term
 	@{
@@ -307,6 +320,7 @@ expr:
 		@i @term.1.symtab@ = @expr.symtab@;
 
 		@i @expr.bt@ = INT_T;
+		@i @expr.n@ = NULL;
 		@codegen check_binop_types(@term.0.bt@, @term.1.bt@);
 	@}
 	| term HASH term
@@ -315,6 +329,8 @@ expr:
 		@i @term.1.symtab@ = @expr.symtab@;
 
 		@i @expr.bt@ = INT_T;
+
+		@i @expr.n@ = NULL;
 
 		@codegen {
 			if(@term.0.bt@ != @term.1.bt@) {
@@ -329,12 +345,16 @@ expr:
 		@codegen symtab_check_new(@expr.symtab@, @ID.id@, @ID.lineNr@);
 
 		@i @expr.bt@ = OBJECT_T;
+
+		@i @expr.n@ = NULL;
 	@}
 	| term
 	@{
 		@i @term.symtab@ = @expr.symtab@;
 
 		@i @expr.bt@ = @term.bt@;
+
+		@i @expr.n@ = @term.n@;
 	@}
 	;
 
@@ -342,18 +362,22 @@ notexpr:
 	MINUS
 	@{
 		@i @notexpr.bt@ = INT_T;
+		@i @notexpr.n@ = newNumNode(-1);
 	@}
 	| NOT
 	@{
 		@i @notexpr.bt@ = INT_T;
+		@i @notexpr.n@ = NULL;
 	@}
 	| MINUS notexpr
 	@{
 		@i @notexpr.bt@ = INT_T;
+		@i @notexpr.n@ = newOperatorNode(OP_NEG, @notexpr.1.n@, NULL);
 	@}
 	| NOT notexpr
 	@{
 		@i @notexpr.bt@ = INT_T;
+		@i @notexpr.n@ = NULL;
 	@}
 	;
 
@@ -365,6 +389,7 @@ addexpr:
 
 		@i @addexpr.bt@ = INT_T;
 		@codegen check_binop_types(@term.0.bt@, @term.1.bt@);
+		@i @addexpr.n@ = newOperatorNode(OP_ADD, @term.0.n@, @term.1.n@);
 	@}
 	| addexpr PLUS term
 	@{
@@ -373,6 +398,7 @@ addexpr:
 
 		@i @addexpr.bt@ = INT_T;
 		@codegen check_binop_types(@addexpr.1.bt@, @term.bt@);
+		@i @addexpr.0.n@ = newOperatorNode(OP_ADD, @addexpr.1.n@, @term.n@);
 	@}
 	;
 
@@ -383,6 +409,9 @@ multexpr:
 		@i @term.1.symtab@ = @multexpr.symtab@;
 
 		@i @multexpr.bt@ = INT_T;
+
+		@i @multexpr.n@ = newOperatorNode(OP_MULT, @term.0.n@, @term.1.n@);
+
 		@codegen check_binop_types(@term.0.bt@, @term.1.bt@);
 	@}
 	| multexpr MULTIPLY term
@@ -391,6 +420,9 @@ multexpr:
 		@i @multexpr.1.symtab@ = @multexpr.0.symtab@;
 
 		@i @multexpr.bt@ = INT_T;
+
+		@i @multexpr.0.n@ = newOperatorNode(OP_MULT, @multexpr.1.n@, @term.n@);
+
 		@codegen check_binop_types(@multexpr.1.bt@, @term.bt@);
 	@}
 	;
@@ -402,6 +434,8 @@ orexpr:
 		@i @term.1.symtab@ = @orexpr.symtab@;
 
 		@i @orexpr.bt@ = INT_T;
+		@i @orexpr.n@ = newOperatorNode(OP_OR, @term.0.n@, @term.1.n@);
+
 		@codegen check_binop_types(@term.0.bt@, @term.1.bt@);
 	@}
 	| orexpr OR term
@@ -410,6 +444,7 @@ orexpr:
 		@i @orexpr.1.symtab@ = @orexpr.0.symtab@;
 
 		@i @orexpr.bt@ = INT_T;
+		@i @orexpr.n@ = newOperatorNode(OP_OR, @orexpr.1.n@, @term.n@);
 		@codegen check_binop_types(@orexpr.1.bt@, @term.bt@);
 	@}
 	;
@@ -420,24 +455,30 @@ term:
 		@i @expr.symtab@ = @term.symtab@;
 
 		@i @term.bt@ = @expr.bt@;
+		@i @term.n@ = @expr.n@;
 	@}
 	| NUM
 	@{
 		@i @term.bt@ = INT_T;
+		@i @term.n@ = newNumNode(@NUM.n@);
 	@}
 	| NULLKEY
 	@{
 		@i @term.bt@ = OBJECT_T;
+		@i @term.n@ = NULL;
 	@}
 	| ID 
 	@{
 		@i @term.bt@ = symtab_lookup_return_type(@term.symtab@, @ID.id@);
+		@i @term.n@ = NULL;
 	@}
+	// TODO: remove NULL from ID
 	| ID LEFT_PAREN expr expr_list RIGHT_PAREN
 	@{
 		@i @expr.symtab@ = @term.symtab@;
 		@i @expr_list.symtab@ = @term.symtab@;
 		@i @term.bt@ = symtab_lookup_return_type(@term.symtab@, @ID.id@);
+		@i @term.n@ = NULL;
 	@}
 	;
 

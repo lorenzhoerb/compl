@@ -14,7 +14,7 @@ void defineClassSection(char *className, char **selectors, unsigned size) {
 }
 
 void defineObject(char *objName, char *className) {
-    printf("%s:\n");
+    printf("%s:\n", objName);
     printf(".quad %s\n", className);
     // toDo add quads for obj vars;
 }

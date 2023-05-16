@@ -7,11 +7,16 @@
 %}
 
 %start num
-%term OP_REG = 1 OP_NUM = 2 OP_ID = 3 OP_ADD = 4
+%term OP_REG = 1 OP_NUM = 2 OP_ID = 3 OP_ADD = 4 OP_MULT = 5 OP_NEG = 6 OP_UNARY = 7 OP_OR = 8
 
 %%
 
+num: OP_UNARY(num, num) # 1 # printf("Calc: %d\n", kids[0]->val * kids[1]->val); bnode->val = kids[0]->val * kids[1]->val;
+num: OP_NEG(num)     # 1 # bnode->val = -1*kids[0]->val;
+
+num: OP_MULT(num, num)   # 1 # printf("Calculate: %d * %d = %d\n", kids[0]->val, kids[1]->val, kids[0]->val * kids[1] ->val); bnode->val=kids[0]->val * kids[1]->val;
 num: OP_ADD(num, num)   # 1 # printf("Calculate: %d + %d = %d\n", kids[0]->val, kids[1]->val, kids[0]->val + kids[1] ->val); bnode->val=kids[0]->val + kids[1]->val;
+num: OP_OR(num, num) # 1 # printf("Calculated bit or: %d", kids[0]->val | kids[1]->val); bnode->val = kids[0]->val | kids[1]->val;
 
 
 num:	OP_NUM     # 1 # printf("i am a register\n");

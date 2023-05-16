@@ -3,5 +3,6 @@ int a(object, int, int);
 class c1
 int kek;
 int a(object o, int i, int j)
+3 or 5;
 return 0 end;
 end;

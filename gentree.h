@@ -38,7 +38,11 @@ enum {
     OP_REG = 1,
     OP_NUM = 2,
     OP_ID = 3,
-    OP_ADD = 4
+    OP_ADD = 4,
+    OP_MULT = 5,
+    OP_NEG = 6,
+    OP_UNARY = 7,
+    OP_OR = 8
 };
 
 #endif
