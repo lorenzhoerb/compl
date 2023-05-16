@@ -4,7 +4,7 @@ class c1
 int kek;
 int a(object o, int i, int j)
 
-6 > 4;
+4 # 4;
 
 return 0 end;
 end;

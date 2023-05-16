@@ -330,7 +330,7 @@ expr:
 
 		@i @expr.bt@ = INT_T;
 
-		@i @expr.n@ = NULL;
+		@i @expr.n@ = newOperatorNode(OP_HASH, @term.0.n@, @term.1.n@);
 
 		@codegen {
 			if(@term.0.bt@ != @term.1.bt@) {

@@ -43,7 +43,9 @@ enum {
     OP_NEG = 6,
     OP_UNARY = 7,
     OP_OR = 8,
-    OP_GREATER = 9
+    OP_GREATER = 9,
+    OP_HASH = 10
+
 };
 
 #endif
