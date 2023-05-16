@@ -2,3 +2,4 @@ codea
 *.o
 codea_iburg.c
 oxout.*
+tests/

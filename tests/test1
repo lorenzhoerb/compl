@@ -4,6 +4,8 @@ class c1
 int kek;
 int a(object o, int i, int j)
 
+1+1;
+1+(-1);
 4 # 4;
 
 return 0 end;
