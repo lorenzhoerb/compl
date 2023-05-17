@@ -116,6 +116,8 @@ bool symtab_contains(symtab *symtab, char *name);
  */
 void symtab_print(symtab *symtab);
 
+int symtab_lookup_var_offset(struct symbol_table *symtab, char *name);
+
 /**
  * Looks up a symbol table entry with the given name.
  * @return symbol table entry if entry with given name exists else NULL

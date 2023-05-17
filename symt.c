@@ -382,3 +382,8 @@ void printLocalVars(symtab *symtab) {
     }
   }
 }
+
+int symtab_lookup_var_offset(struct symbol_table *symtab, char *name) {
+  sym_entry *entry = symtab_lookup(symtab, name);
+  return entry->varOffset;
+}

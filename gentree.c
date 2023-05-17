@@ -30,8 +30,9 @@ treenode *newNumNode(long num) {
     return newNode;
 }
 
-treenode *newIdNode(char *id) {
+treenode *newIdNode(char *id, int offset) {
     treenode *newNode = newOperatorNode(OP_ID, NULL, NULL);
     newNode->id = id;
+    newNode->val = offset;
     return newNode;
 }

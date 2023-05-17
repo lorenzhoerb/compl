@@ -225,7 +225,7 @@ stat:
 		@i @stat.symtab_out@ = symtab_insert_local_var(@stat.symtab@, @ID.id@, @type.bt@, @ID.lineNr@);
 		@codegen symtab_check_assign(@stat.symtab@, @ID.id@, @expr.bt@, @ID.lineNr@);
 		@i @expr.symtab@ = @stat.symtab@;
-		@i @stat.n@ = NULL;
+		@i @stat.n@ = newOperatorNode(OP_ASSIGN, newIdNode(@ID.id@, symtab_lookup_var_offset(@stat.symtab_out@, @ID.id@)), @expr.n@);
 		@i @stat.varCount@ = 1;
 	@}
 	| ID ASSIGN expr
@@ -509,7 +509,7 @@ term:
 	| ID 
 	@{
 		@i @term.bt@ = symtab_lookup_return_type(@term.symtab@, @ID.id@);
-		@i @term.n@ = NULL;
+		@i @term.n@ = newIdNode(@ID.id@, symtab_lookup_var_offset(@term.symtab@, @ID.id@));
 	@}
 	// TODO: remove NULL from ID
 	| ID LEFT_PAREN expr expr_list RIGHT_PAREN

@@ -32,7 +32,7 @@ typedef treenode *treenodep;
 treenode *newOperatorNode(int op, treenode *left, treenode *right);
 treenode *newRegisterNode(char* regname);
 treenode *newNumNode(long num);
-treenode *newIdNode(char *id);
+treenode *newIdNode(char *id, int offset);
 
 enum {
     OP_REG = 1,
@@ -44,7 +44,8 @@ enum {
     OP_UNARY = 7,
     OP_OR = 8,
     OP_GREATER = 9,
-    OP_HASH = 10
+    OP_HASH = 10,
+    OP_ASSIGN = 11
 
 };
 

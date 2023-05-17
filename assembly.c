@@ -31,6 +31,9 @@ void setupMethodStack(unsigned varCount) {
     printf("enter $%d, $0\n", 8*varCount);
 }
 
+void writeDecleration(int value, int destOffset) {
+    printf("moveq $%d, %d(%%sbp)\n", value, destOffset);
+}
 
 void genReturn() {
     printf("ret\n\n");
