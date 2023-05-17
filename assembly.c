@@ -20,10 +20,15 @@ void defineObject(char *objName, char *className) {
 }
 
 
-void implementMethod(char *className, char *methodName) {
+void implementMethod(char *className, char *methodName, unsigned varCount) {
     printf("\n.type %s_%s, @function\n", className, methodName);
     printf("%s_%s:\n", className, methodName);
+    setupMethodStack(varCount);
     printf("\n");
+}
+
+void setupMethodStack(unsigned varCount) {
+    printf("enter $%d, $0\n", 8*varCount);
 }
 
 

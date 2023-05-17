@@ -22,7 +22,7 @@ extern void invoke_burm(NODEPTR_TYPE root);
 @attributes { char* id; unsigned lineNr; } ID
 @attributes { unsigned n; } NUM
 @attributes { struct symbol_table *symtab; struct symbol_table *symtab_in; struct symbol_table *symtab_out; struct selector_list *sl;} class 
-@attributes { struct symbol_table *symtab; int returnType;} guarded guarded_list cond 
+@attributes { struct symbol_table *symtab; int returnType; unsigned varCount;} guarded guarded_list cond 
 @attributes { struct symbol_table *symtab;} expr_list
 @attributes { struct symbol_table *symtab; char *className;} method
 @attributes { int bt;} type
@@ -38,12 +38,12 @@ extern void invoke_burm(NODEPTR_TYPE root);
 @attributes { struct symbol_table *symtab;} start
 @attributes { struct symbol_table *symtab; struct symbol_table *up; char *className;} member_list 
 
-@attributes { struct symbol_table *symtab; struct symbol_table *symtab_out; int returnType; struct s_node *n;} stat 
+@attributes { struct symbol_table *symtab; struct symbol_table *symtab_out; int returnType; struct s_node *n; unsigned varCount;} stat 
 
 @attributes { struct symbol_table *symtab; int returnType;} return
 
 @attributes { struct symbol_table *symtab; int returnType; struct s_node *n;} stats
-@attributes {struct symbol_table *symtab; int returnType; } m_stat_list  g_stat_list
+@attributes {struct symbol_table *symtab; int returnType; unsigned varCount; } m_stat_list  g_stat_list
 
 @traversal @preorder codegen
 @traversal @postorder codegenpost
@@ -129,7 +129,7 @@ method: type ID LEFT_PAREN pars RIGHT_PAREN m_stat_list
 
 		@codegen {
 			symtab_check_method_impl(@method.symtab@, @ID.id@, complex_type_init(@type.bt@, @pars.tl@), @ID.lineNr@);
-			implementMethod(@method.className@, @ID.id@);
+			implementMethod(@method.className@, @ID.id@, @m_stat_list.varCount@);
 		}
 	@}
 	;
@@ -168,6 +168,7 @@ m_stat_list:
 	@{
 		@i @return.returnType@ = @m_stat_list.returnType@;
 		@i @return.symtab@ = @m_stat_list.symtab@;
+		@i @m_stat_list.varCount@ = 0;
 	@}
 	| stat ';' m_stat_list
 	@{
@@ -175,19 +176,26 @@ m_stat_list:
 		@i @stat.returnType@ = @m_stat_list.returnType@;
 		@i @m_stat_list.1.symtab@ = @stat.symtab_out@;
 		@i @m_stat_list.1.returnType@ = @m_stat_list.0.returnType@;
+
+		@i @m_stat_list.varCount@ = @stat.varCount@ + @m_stat_list.1.varCount@;
+
 		@codegen if(@stat.n@ != NULL) invoke_burm(@stat.n@);
 	@}
 	;
 
 g_stat_list:
 	escape
+	@{
+		@i @g_stat_list.varCount@ = 0;
+	@}
 	| stat ';' g_stat_list
 	@{
 		@i @stat.returnType@ = @g_stat_list.returnType@; 
 		@i @g_stat_list.1.returnType@ = @g_stat_list.0.returnType@;
 		@i @stat.symtab@ = @g_stat_list.0.symtab@;
 		@i @g_stat_list.1.symtab@ = @stat.symtab_out@;
-		
+
+		@i @g_stat_list.varCount@ = @stat.varCount@ + @g_stat_list.1.varCount@;
 	@}
 	;
 
@@ -199,6 +207,8 @@ stat:
 
 		@i @return.returnType@ = @stat.returnType@;
 		@i @stat.n@ = NULL;
+
+		@i @stat.varCount@ = 0;
 	@}
 	| cond
 	@{
@@ -207,6 +217,7 @@ stat:
 
 		@i @cond.returnType@ = @stat.returnType@;
 		@i @stat.n@ = NULL;
+		@i @stat.varCount@ = @cond.varCount@;
 	@}
 	| type ID ASSIGN expr
 		/* @i @stat.symtab_out@ = symtab_insert(@stat.symtab@, @ID.id@, VAR, complex_type_init(@type.bt@, NULL), @ID.lineNr@); */
@@ -215,6 +226,7 @@ stat:
 		@codegen symtab_check_assign(@stat.symtab@, @ID.id@, @expr.bt@, @ID.lineNr@);
 		@i @expr.symtab@ = @stat.symtab@;
 		@i @stat.n@ = NULL;
+		@i @stat.varCount@ = 1;
 	@}
 	| ID ASSIGN expr
 	@{
@@ -222,12 +234,16 @@ stat:
 		@i @expr.symtab@ = @stat.symtab@;
 		@i @stat.symtab_out@ = @stat.symtab@;
 		@i @stat.n@ = NULL;
+
+		@i @stat.varCount@ = 0;
 	@}
 	| expr
 	@{
 		@i @expr.symtab@ = @stat.symtab@;
 		@i @stat.symtab_out@ = @stat.symtab@;
 		@i @stat.n@ = @expr.n@;
+
+		@i @stat.varCount@ = 0;
 	@}
 	;
 
@@ -236,11 +252,16 @@ cond: COND guarded_list END
 		@i @guarded_list.symtab@ = @cond.symtab@;
 		
 		@i @guarded_list.returnType@ = @cond.returnType@;
+
+		@i @cond.varCount@ = @guarded_list.varCount@;
 	@}
 	;
 
 guarded_list: 
 	/* empty */
+	@{
+		@i @guarded_list.varCount@ = 0;
+	@}
 	| guarded_list guarded ';' 
 	@{
 		@i @guarded.symtab@ = symtab_namespace(@guarded_list.0.symtab@);
@@ -248,6 +269,8 @@ guarded_list:
 
 		@i @guarded_list.1.returnType@ = @guarded_list.0.returnType@;
 		@i @guarded.returnType@ = @guarded_list.0.returnType@;
+
+		@i @guarded_list.varCount@ = @guarded_list.1.varCount@ + @guarded.varCount@;
 	@}
 	;
 
@@ -258,6 +281,8 @@ guarded:
 		@i @expr.symtab@ = @guarded.symtab@;
 
 		@i @g_stat_list.returnType@ = @guarded.returnType@;
+
+		@i @guarded.varCount@ = @g_stat_list.varCount@;
 
 		@codegen {
 			if(@expr.bt@ != INT_T) {
@@ -271,6 +296,8 @@ guarded:
 		@i @g_stat_list.symtab@ = @guarded.symtab@;
 
 		@i @g_stat_list.returnType@ = @guarded.returnType@;
+
+		@i @guarded.varCount@ = @g_stat_list.varCount@;
 	@}
 	;
 
