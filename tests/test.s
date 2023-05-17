@@ -1,7 +1,0 @@
-object x(object);
-class a 
-object x(object y) 
-    return z; 
-    object z<-y; 
-    return y end;
-end;
