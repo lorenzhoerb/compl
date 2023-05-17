@@ -209,9 +209,9 @@ stat:
 		@i @stat.n@ = NULL;
 	@}
 	| type ID ASSIGN expr
+		/* @i @stat.symtab_out@ = symtab_insert(@stat.symtab@, @ID.id@, VAR, complex_type_init(@type.bt@, NULL), @ID.lineNr@); */
 	@{
-		@i @stat.symtab_out@ = symtab_insert(@stat.symtab@, @ID.id@, VAR, complex_type_init(@type.bt@, NULL), @ID.lineNr@);
-
+		@i @stat.symtab_out@ = symtab_insert_local_var(@stat.symtab@, @ID.id@, @type.bt@, @ID.lineNr@);
 		@codegen symtab_check_assign(@stat.symtab@, @ID.id@, @expr.bt@, @ID.lineNr@);
 		@i @expr.symtab@ = @stat.symtab@;
 		@i @stat.n@ = NULL;
@@ -285,6 +285,7 @@ return: RETURN expr
 
 		@codegen {
 			is_return_valid(@return.returnType@, @expr.bt@);
+			printLocalVars(@return.symtab@);
 			genReturn();
 		}
 	@}

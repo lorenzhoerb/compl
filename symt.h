@@ -14,12 +14,14 @@ typedef struct symbol_entry {
   struct complex_type *type;
   unsigned lineNr;
   struct symbol_entry *next;
+  int varOffset;
 } sym_entry;
 
 typedef struct symbol_table {
   struct symbol_table *parent;
   sym_entry *first;
   sym_entry *last;
+  int localVarCount;
 } symtab;
 
 struct selector_list {
@@ -96,6 +98,8 @@ symtab *symtab_merge(symtab *symtab1, symtab *symtab2);
 symtab *symtab_insert(symtab *symtab, char *name, enum sym_kind kind,
                       struct complex_type *type, unsigned lineNr);
 
+symtab *symtab_insert_local_var(symtab *symtab, char *name, enum basic_type, unsigned lineNr);
+
 /**
  * Creates a new namespace. Returns a new symbol tabel refering to it's parente.
  */
@@ -148,5 +152,7 @@ symtab_itr *symtab_iter(symtab *symtab);
  * @return Next element if exists else NULL
  */
 sym_entry *symtab_next(symtab_itr *itr);
+
+void printLocalVars(symtab *symtab);
 
 #endif

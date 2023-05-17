@@ -76,10 +76,11 @@ void itr_print(symtab *symtab) {
 }
 
 symtab *symtab_init() {
-  symtab *symtab = malloc(sizeof(symtab));
+  symtab *symtab = malloc(sizeof(struct symbol_table));
   symtab->first = NULL;
   symtab->last = NULL;
   symtab->parent = NULL;
+  symtab->localVarCount = 0;
   return symtab;
 }
 
@@ -132,17 +133,19 @@ void print_types(types *types) {
 symtab *symtab_namespace(symtab *parent) {
   symtab *namespace = symtab_init();
   namespace->parent = parent;
+  namespace->localVarCount = parent->localVarCount;
   return namespace;
 }
 
 sym_entry *sym_entry_init(char *name, enum sym_kind kind,
                           struct complex_type *type, unsigned lineNr) {
-  sym_entry *entry = (sym_entry *)malloc(sizeof(sym_entry));
+  sym_entry *entry = (sym_entry *)malloc(sizeof(struct symbol_entry));
   entry->name = name;
   entry->kind = kind;
   entry->type = type;
   entry->lineNr = lineNr;
   entry->next = NULL;
+  entry->varOffset = 0;
   return entry;
 }
 
@@ -174,6 +177,16 @@ symtab *symtab_insert(symtab *symtab, char *name, enum sym_kind kind,
 
   symtab_print(symtab);
   // itr_print(symtab);
+  return symtab;
+}
+
+
+symtab *symtab_insert_local_var(symtab *symtab, char *name, enum basic_type bt, unsigned lineNr) {
+  struct complex_type *ct = complex_type_init(bt, NULL);
+  symtab = symtab_insert(symtab, name, VAR, ct, lineNr);
+  sym_entry *entry = symtab_lookup(symtab, name);
+  entry->varOffset = symtab->localVarCount;
+  symtab->localVarCount++;
   return symtab;
 }
 
@@ -354,4 +367,18 @@ struct selector_list *get_selectors(symtab *symtab) {
     }
   }
   return sl;
+}
+
+
+void printLocalVars(symtab *symtab) {
+  if(DEBUG) {
+    printf("local vars:\n");
+    symtab_itr *itr = symtab_iter(symtab);
+    sym_entry *entry;
+    for (entry = symtab_next(itr); entry != NULL; entry = symtab_next(itr)) {
+      if (entry->kind == VAR) {
+        printf("Var: %s, Offset: %d\n", entry->name, entry->varOffset);
+      }
+    }
+  }
 }
