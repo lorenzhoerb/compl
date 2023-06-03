@@ -30,8 +30,8 @@ extern void invoke_burm(NODEPTR_TYPE root);
 @attributes { struct type_list *tl;} type_list
 @attributes { struct symbol_table *symtab; int bt; struct s_node *n;} term addexpr expr multexpr orexpr 
 
-@attributes {struct type_list *tl; struct symbol_table *symtab; struct symbol_table *symtab_out;} pars
-@attributes { struct symbol_table *symtab; int bt; struct symbol_table *symtab_out;} par
+@attributes {struct type_list *tl; struct symbol_table *symtab; struct symbol_table *symtab_out; int parOffset;} pars
+@attributes { struct symbol_table *symtab; int bt; struct symbol_table *symtab_out; int parOffset;} par
 
 @attributes { struct symbol_table *symtab; struct symbol_table *symtab_out;} selector
 @attributes { struct symbol_table *symtab; struct symbol_table *out; struct selector_list *sl;} program
@@ -123,6 +123,7 @@ member_list:
 method: type ID LEFT_PAREN pars RIGHT_PAREN m_stat_list
 	@{
 		@i @pars.symtab@ = symtab_namespace(@method.symtab@);
+		@i @pars.parOffset@ = -1;
 
 		@i @m_stat_list.symtab@ = @pars.symtab_out@;
 		@i @m_stat_list.returnType@ = @type.bt@;
@@ -139,6 +140,7 @@ pars:
 	@{
 		@i @par.symtab@ = @pars.symtab@;
 		@i @pars.symtab_out@ = @par.symtab_out@;
+		@i @par.parOffset@ = @pars.parOffset@;
 
 		@i @pars.tl@ = types_add(types_init(), @par.bt@);
 	@}
@@ -146,6 +148,9 @@ pars:
 	@{
 		@i @pars.1.symtab@ = @pars.0.symtab@;
 		@i @par.0.symtab@ = @pars.1.symtab_out@;
+
+		@i @par.parOffset@ = @pars.0.parOffset@;
+		@i @pars.1.parOffset@ = @pars.0.parOffset@ - 1;
 
 		@i @pars.0.symtab_out@ = @pars.1.symtab_out@;
 
@@ -158,7 +163,7 @@ pars:
 
 par: type ID
 	@{
-		@i @par.symtab_out@ = symtab_insert(@par.symtab@, @ID.id@, PARAMETER, complex_type_init(@type.bt@, NULL), @ID.lineNr@);
+		@i @par.symtab_out@ = symtab_insert_param(@par.symtab@, @ID.id@, @type.bt@, @par.parOffset@ ,@ID.lineNr@);
 		@i @par.bt@ = @type.bt@;
 	@}
 	;

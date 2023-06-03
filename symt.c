@@ -180,6 +180,13 @@ symtab *symtab_insert(symtab *symtab, char *name, enum sym_kind kind,
   return symtab;
 }
 
+symtab *symtab_insert_param(symtab *symtab, char *name, enum basic_type bt, int parOffset ,unsigned lineNr) {
+  struct complex_type *ct = complex_type_init(bt, NULL);
+  symtab = symtab_insert(symtab, name, PARAMETER, ct, lineNr);
+  sym_entry *entry = symtab_lookup(symtab, name);
+  entry->varOffset = parOffset;
+  return symtab; 
+}
 
 symtab *symtab_insert_local_var(symtab *symtab, char *name, enum basic_type bt, unsigned lineNr) {
   struct complex_type *ct = complex_type_init(bt, NULL);
@@ -335,6 +342,9 @@ void symtab_print(symtab *symtab) {
     sym_entry *tmp = symtab->first;
     for (; tmp != NULL; tmp = tmp->next) {
       printf("%s", tmp->name);
+      if(tmp->kind == PARAMETER || tmp->kind == VAR) {
+        printf(" offset:%d", tmp->varOffset);
+      }
       if (tmp->next != NULL) {
         printf(",");
       }

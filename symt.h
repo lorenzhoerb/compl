@@ -2,7 +2,7 @@
 #define SYMT
 #include <stdbool.h>
 #include <stdlib.h>
-#define DEBUG 0
+#define DEBUG 1
 
 enum sym_kind { VAR, METHOD, PARAMETER, OBJ_VAR, CLASS_NAME };
 
@@ -89,6 +89,8 @@ bool complex_type_equals(struct complex_type *t1, struct complex_type *t2);
  * Merges two tables and returns the merged one
  */
 symtab *symtab_merge(symtab *symtab1, symtab *symtab2);
+
+symtab *symtab_insert_param(symtab *symtab, char *name, enum basic_type bt, int parOffset ,unsigned lineNr);
 
 /**
  * Inserts a symbol entry to a symbol table if it is not already existing.

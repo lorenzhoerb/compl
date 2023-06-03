@@ -12,14 +12,14 @@
 
 %%
 
-num: OP_UNARY(num, num) # 1 # printf("Calc: %d\n", kids[0]->val * kids[1]->val); bnode->val = kids[0]->val * kids[1]->val;
+num: OP_UNARY(num, num) # 1 # bnode->val = kids[0]->val * kids[1]->val;
 num: OP_NEG(num)     # 1 # bnode->val = -1*kids[0]->val;
 
-num: OP_MULT(num, num)   # 1 # printf("Calculate: %d * %d = %d\n", kids[0]->val, kids[1]->val, kids[0]->val * kids[1] ->val); bnode->val=kids[0]->val * kids[1]->val;
-num: OP_ADD(num, num)   # 1 # printf("Calculate: %d + %d = %d\n", kids[0]->val, kids[1]->val, kids[0]->val + kids[1] ->val); bnode->val=kids[0]->val + kids[1]->val;
-num: OP_OR(num, num) # 1 # printf("Calculated bit or: %d\n", kids[0]->val | kids[1]->val); bnode->val = kids[0]->val | kids[1]->val;
-num: OP_GREATER(num, num) # 1 # printf("%d > %d = %d\n", kids[0]->val, kids[1]->val, kids[0]->val > kids[1]->val ? -1 : 0); bnode->val = kids[0]->val > kids[1]->val ? -1 : 0;
-num: OP_HASH(num, num) # 1 # printf("%d HASH  %d = %d\n", kids[0]->val, kids[1]->val, kids[0]->val != kids[1]->val ? -1 : 0); bnode->val = kids[0]->val != kids[1]->val ? -1 : 0;
+num: OP_MULT(num, num)   # 1 # bnode->val=kids[0]->val * kids[1]->val;
+num: OP_ADD(num, num)   # 1 #  bnode->val=kids[0]->val + kids[1]->val;
+num: OP_OR(num, num) # 1 #  bnode->val = kids[0]->val | kids[1]->val;
+num: OP_GREATER(num, num) # 1 # bnode->val = kids[0]->val > kids[1]->val ? -1 : 0;
+num: OP_HASH(num, num) # 1 # bnode->val = kids[0]->val != kids[1]->val ? -1 : 0;
 num: OP_ASSIGN(id, num) # 1 # writeDecleration(kids[1]->val, kids[0]->val);
 
 num:	OP_NUM     # 1 # 
