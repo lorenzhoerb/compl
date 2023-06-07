@@ -8,7 +8,7 @@
 %}
 
 %start stat
-%term OP_REG = 1 OP_NUM = 2 OP_ID = 3 OP_ADD = 4 OP_MULT = 5 OP_NEG = 6 OP_UNARY = 7 OP_OR = 8 OP_GREATER = 9 OP_HASH = 10 OP_ASSIGN = 11
+%term OP_REG = 1 OP_NUM = 2 OP_ID = 3 OP_ADD = 4 OP_MULT = 5 OP_NEG = 6 OP_UNARY = 7 OP_OR = 8 OP_GREATER = 9 OP_HASH = 10 OP_ASSIGN = 11 OP_RETURN = 12
 
 %%
 
@@ -25,10 +25,20 @@ num: OP_GREATER(num, num) # 1 # bnode->val = kids[0]->val > kids[1]->val ? -1 : 
 num: OP_HASH(num, num) # 1 # bnode->val = kids[0]->val != kids[1]->val ? -1 : 0;
 num: OP_ASSIGN(OP_ID, num) # 1 # writeDecleration(bnode->kids[0]->val, bnode->kids[1]->val);
 
-reg: OP_ADD(reg, num) # 1 # printf("ADD: to implement\n");
+reg: OP_RETURN(num) # 1 # writeReturnNum(kids[0]->val);
+
+reg: OP_RETURN(reg) # 1 # writeReturnReg(kids[0]->regname);
+
+reg: OP_ADD(reg, num) # 1 # writeOpNumReg("addq", kids[0]->regname, kids[1]->val);
+
+reg: OP_ADD(num, reg) # 1 # writeOpNumReg("addq", kids[1]->regname, kids[0]->val);
+
+reg: OP_MULT(reg, num) # 1 # writeOpNumReg("imulq", kids[0]->regname, kids[1]->val);
+
+reg: OP_ADD(reg, reg) # 1 # bnode->regname = kids[0]->regname; writeOpRegReg("addq", kids[0]->regname, kids[1]->regname);
 
 num:	OP_NUM     # 1 # 
-reg:    OP_ID       # 1 # writeLoadId(bnode->val, "rax");
+reg:    OP_ID       # 1 # if(bnode->regname != NULL && bnode->val != -1) {writeLoadId(bnode->val, bnode->regname);}
 
 %%
 

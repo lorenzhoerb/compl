@@ -16,6 +16,9 @@ gentree.o: gentree.c gentree.h
 assembly.o: assembly.c assembly.h
 	gcc -g -c -pedantic -Wall -o assembly.o assembly.c
 
+reg.o: reg.c reg.h
+	gcc -g -c -pedantic -Wall -o reg.o reg.c
+
 
 $(NAME)_iburg.c: code.bfe
 	bfe < code.bfe | iburg > $(NAME)_iburg.c

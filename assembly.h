@@ -11,5 +11,10 @@ void genReturn(void);
 void writeDecleration(int destOffset, int value);
 void writeLoadId(int offset, char *destReg);
 int offsetToAddrOffset(int offset);
+void writeAddNumToReg(char *regname, int val);
+void writeOpNumReg(char *op, char *regname, int val);
+void writeOpRegReg(char *op, char *srcReg, char *destReg);
+void writeReturnNum(int val);
+void writeReturnReg(char *regname);
 
 #endif

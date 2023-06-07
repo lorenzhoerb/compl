@@ -5,15 +5,44 @@
 #include "symt.h"
 #include "gentree.h"
 #include "assembly.h"
+#define REG_SIZE 7
 
 int yylex(void);
 int yyerror(char* s);
+
 %}
 
 %token ASSIGN ARROW MINUS PLUS MULTIPLY GREATER_THAN HASH  RIGHT_PAREN LEFT_PAREN NEW OR SEMICOLON ','
 %token OBJECT INT CLASS END RETURN COND CONTINUE BREAK NOT NULLKEY
 %token NUM ID
 %start start
+
+%{
+	const char* regs[REG_SIZE] = {
+    "rdi",
+    "rsi",
+    "rdx",
+    "rcx",
+    "r8",
+    "r9",
+    "r10",
+};
+
+typedef struct reg_manager {
+    int parCount;
+    int regPointer;
+} reg_manager_t;
+
+reg_manager_t *regm = NULL;
+
+const char *resolveReg(int regIndex);
+int nextReg(void);
+int nextParReg(void);
+void initRegManager(void);
+void clearTillParam(void);
+int getIdReg(struct symbol_table *symtab, char *name);
+
+%}
 
 %{
 extern void invoke_burm(NODEPTR_TYPE root);
@@ -30,8 +59,8 @@ extern void invoke_burm(NODEPTR_TYPE root);
 @attributes { struct type_list *tl;} type_list
 @attributes { struct symbol_table *symtab; int bt; struct s_node *n;} term addexpr expr multexpr orexpr 
 
-@attributes {struct type_list *tl; struct symbol_table *symtab; struct symbol_table *symtab_out; int parOffset;} pars
-@attributes { struct symbol_table *symtab; int bt; struct symbol_table *symtab_out; int parOffset;} par
+@attributes {struct type_list *tl; struct symbol_table *symtab; struct symbol_table *symtab_out; int regPointer_in; int regPointer_out;} pars
+@attributes { struct symbol_table *symtab; int bt; struct symbol_table *symtab_out; int regPointer_in; int regPointer_out;} par
 
 @attributes { struct symbol_table *symtab; struct symbol_table *symtab_out;} selector
 @attributes { struct symbol_table *symtab; struct symbol_table *out; struct selector_list *sl;} program
@@ -40,7 +69,7 @@ extern void invoke_burm(NODEPTR_TYPE root);
 
 @attributes { struct symbol_table *symtab; struct symbol_table *symtab_out; int returnType; struct s_node *n; unsigned varCount;} stat 
 
-@attributes { struct symbol_table *symtab; int returnType;} return
+@attributes { struct symbol_table *symtab; int returnType; struct s_node *n;} return
 
 @attributes { struct symbol_table *symtab; int returnType; struct s_node *n;} stats
 @attributes {struct symbol_table *symtab; int returnType; unsigned varCount; } m_stat_list  g_stat_list
@@ -123,7 +152,7 @@ member_list:
 method: type ID LEFT_PAREN pars RIGHT_PAREN m_stat_list
 	@{
 		@i @pars.symtab@ = symtab_namespace(@method.symtab@);
-		@i @pars.parOffset@ = -1;
+		@i @pars.regPointer_in@ = 0;
 
 		@i @m_stat_list.symtab@ = @pars.symtab_out@;
 		@i @m_stat_list.returnType@ = @type.bt@;
@@ -140,7 +169,9 @@ pars:
 	@{
 		@i @par.symtab@ = @pars.symtab@;
 		@i @pars.symtab_out@ = @par.symtab_out@;
-		@i @par.parOffset@ = @pars.parOffset@;
+
+		@i @par.regPointer_in@ = @pars.regPointer_in@;
+		@i @pars.regPointer_out@ = @par.regPointer_in@;
 
 		@i @pars.tl@ = types_add(types_init(), @par.bt@);
 	@}
@@ -149,10 +180,12 @@ pars:
 		@i @pars.1.symtab@ = @pars.0.symtab@;
 		@i @par.0.symtab@ = @pars.1.symtab_out@;
 
-		@i @par.parOffset@ = @pars.0.parOffset@;
-		@i @pars.1.parOffset@ = @pars.0.parOffset@ - 1;
+		@i @pars.1.regPointer_in@ = @pars.0.regPointer_in@;
+		@i @par.regPointer_in@ = @pars.1.regPointer_out@ + 1;
+		@i @pars.0.regPointer_out@ = @par.regPointer_out@;
 
-		@i @pars.0.symtab_out@ = @pars.1.symtab_out@;
+
+		@i @pars.0.symtab_out@ = @par.0.symtab_out@;
 
 		/*@i @pars.0.tl@ = @pars.1.tl@;
 		@codegen types_add(@pars.0.tl@, @par.bt@);*/
@@ -163,7 +196,8 @@ pars:
 
 par: type ID
 	@{
-		@i @par.symtab_out@ = symtab_insert_param(@par.symtab@, @ID.id@, @type.bt@, @par.parOffset@ ,@ID.lineNr@);
+		@i @par.regPointer_out@ = @par.regPointer_in@ - @par.regPointer_in@ + nextParReg();
+		@i @par.symtab_out@ = symtab_insert_param(@par.symtab@, @ID.id@, @type.bt@, @par.regPointer_out@ ,@ID.lineNr@);
 		@i @par.bt@ = @type.bt@;
 	@}
 	;
@@ -174,6 +208,7 @@ m_stat_list:
 		@i @return.returnType@ = @m_stat_list.returnType@;
 		@i @return.symtab@ = @m_stat_list.symtab@;
 		@i @m_stat_list.varCount@ = 0;
+		@codegen if(@return.n@ != NULL) invoke_burm(@return.n@);
 	@}
 	| stat SEMICOLON m_stat_list
 	@{
@@ -211,9 +246,10 @@ stat:
 		@i @stat.symtab_out@ = @stat.symtab@;
 
 		@i @return.returnType@ = @stat.returnType@;
-		@i @stat.n@ = NULL;
+		@i @stat.n@ = @return.n@;
 
 		@i @stat.varCount@ = 0;
+		@codegen clearTillParam();
 	@}
 	| cond
 	@{
@@ -230,7 +266,7 @@ stat:
 		@i @stat.symtab_out@ = symtab_insert_local_var(@stat.symtab@, @ID.id@, @type.bt@, @ID.lineNr@);
 		@codegen symtab_check_assign(@stat.symtab@, @ID.id@, @expr.bt@, @ID.lineNr@);
 		@i @expr.symtab@ = @stat.symtab@;
-		@i @stat.n@ = newOperatorNode(OP_ASSIGN, newIdNode(@ID.id@, symtab_lookup_var_offset(@stat.symtab_out@, @ID.id@)), @expr.n@);
+		@i @stat.n@ = newOperatorNode(OP_ASSIGN, newIdNode(@ID.id@, symtab_lookup_var_offset(@stat.symtab_out@, @ID.id@), NULL), @expr.n@);
 		@i @stat.varCount@ = 1;
 	@}
 	| ID ASSIGN expr
@@ -314,6 +350,7 @@ escape:
 return: RETURN expr
 	@{
 		@i @expr.symtab@ = @return.symtab@;
+		@i @return.n@ = newOperatorNode(OP_RETURN, @expr.n@, NULL);
 
 		@codegen {
 			is_return_valid(@return.returnType@, @expr.bt@);
@@ -514,7 +551,8 @@ term:
 	| ID 
 	@{
 		@i @term.bt@ = symtab_lookup_return_type(@term.symtab@, @ID.id@);
-		@i @term.n@ = newIdNode(@ID.id@, symtab_lookup_var_offset(@term.symtab@, @ID.id@));
+		@i @term.n@ = newIdNode(@ID.id@, symtab_is_kind(@term.symtab@, @ID.id@, PARAMETER) ? -1 : symtab_lookup_var_offset(@term.symtab@, @ID.id@), regs[getIdReg(@term.symtab@, @ID.id@)]);
+
 	@}
 	// TODO: remove NULL from ID
 	| ID LEFT_PAREN expr expr_list RIGHT_PAREN
@@ -557,6 +595,55 @@ type:
 	@}
 	;
 %%
+
+int getIdReg(struct symbol_table *symtab, char *name) {
+	int regIndex;
+	sym_entry *entry = symtab_lookup(symtab, name);
+	if(entry->kind == PARAMETER) {
+		regIndex = entry->varOffset;
+	} else {
+		regIndex = nextReg();
+	}
+	return regIndex;
+}
+
+void clearTillParam(void) {
+	regm->regPointer = regm->parCount;
+}
+
+const char *resolveReg(int regIndex) {
+    if(regIndex < 0 || regIndex >= REG_SIZE) {
+        return NULL;
+    } else {
+        return regs[regIndex];
+    }
+}
+
+int nextReg(void) {
+    if(regm == NULL) {
+        initRegManager();
+    }
+
+    if(regm->regPointer >= REG_SIZE) {
+        fprintf(stderr, "Error: No more available Register to assign");
+        exit(3);
+    }
+    int regPointer = regm->regPointer;
+    regm->regPointer++;
+    return regPointer;
+}
+
+int nextParReg(void) {
+    int next = nextReg();
+    regm->parCount++;
+    return next;
+}
+
+void initRegManager(void) {
+    regm = malloc(sizeof(reg_manager_t));
+    regm->parCount = 0;
+    regm->regPointer = 0;
+}
 
 int yyerror(char *e)
 {

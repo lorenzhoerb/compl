@@ -1,4 +1,5 @@
 #include "gentree.h"
+#include <string.h>
 
 treenode *newOperatorNode(int op, treenode *left, treenode *right) {
     treenode *newNode = (treenode*) malloc(sizeof(treenode));
@@ -30,9 +31,12 @@ treenode *newNumNode(long num) {
     return newNode;
 }
 
-treenode *newIdNode(char *id, int offset) {
+treenode *newIdNode(char *id, int offset, const char *regname) {
     treenode *newNode = newOperatorNode(OP_ID, NULL, NULL);
     newNode->id = id;
     newNode->val = offset;
+    if(regname != NULL) {
+        newNode->regname = regname;
+    }
     return newNode;
 }

@@ -46,3 +46,23 @@ void writeLoadId(int offset, char *destReg) {
 int offsetToAddrOffset(int offset) {
     return (1+offset)*8;
 }
+
+void writeAddNumToReg(char *regname, int val) {
+    fprintf(stdout, "addq $%d, %%%s\n", val, regname);
+}
+
+void writeOpNumReg(char *op, char *regname, int val) {
+    printf("%s $%d, %%%s\n", op, val, regname);
+}
+
+void writeOpRegReg(char *op, char *srcReg, char *destReg) {
+    printf("%s %%%s, %%%s\n", op, destReg, srcReg);
+}
+
+void writeReturnNum(int val) {
+    printf("movq $%d, %%rax\n", val);
+}
+
+void writeReturnReg(char *regname) {
+    printf("movq %%%s, %%rax\n", regname);
+}
