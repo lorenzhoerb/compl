@@ -3,3 +3,4 @@ codea
 codea_iburg.c
 oxout.*
 tests
+lex.yy.c
