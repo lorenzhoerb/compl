@@ -32,7 +32,7 @@ void setupMethodStack(unsigned varCount) {
 }
 
 void writeDecleration( int destOffset, int value) {
-    printf("moveq $%d, %d(%%sbp)\n", value, (destOffset+1)*8);
+    printf("moveq $%d, %d(%%sbp)\n", value, offsetToAddrOffset(destOffset));
 }
 
 void genReturn() {
