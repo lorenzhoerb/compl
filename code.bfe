@@ -20,10 +20,9 @@ num: OP_ADD(num, num)   # 1 #  bnode->val=kids[0]->val + kids[1]->val;
 num: OP_OR(num, num) # 1 #  bnode->val = kids[0]->val | kids[1]->val;
 num: OP_GREATER(num, num) # 1 # bnode->val = kids[0]->val > kids[1]->val ? -1 : 0;
 num: OP_HASH(num, num) # 1 # bnode->val = kids[0]->val != kids[1]->val ? -1 : 0;
-num: OP_ASSIGN(id, num) # 1 # writeDecleration(kids[0]->val, kids[1]->val);
+num: OP_ASSIGN(OP_ID, num) # 1 # writeDecleration(bnode->kids[0]->val, bnode->kids[1]->val);
 
 num:	OP_NUM     # 1 # 
-id:     OP_ID   # 1 #
 
 %%
 
