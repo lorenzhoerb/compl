@@ -38,3 +38,11 @@ void writeDecleration( int destOffset, int value) {
 void genReturn() {
     printf("ret\n\n");
 }
+
+void writeLoadId(int offset, char *destReg) {
+    printf("movq %d(%%sbp) %s\n", offsetToAddrOffset(offset), destReg);
+}
+
+int offsetToAddrOffset(int offset) {
+    return (1+offset)*8;
+}
