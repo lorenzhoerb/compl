@@ -17,7 +17,7 @@ HEX             0x({HEX_DIGIT}|_)*{HEX_DIGIT}({HEX_DIGIT}|_)*
 
 %%
 ","         return (',');
-";"         return (';');
+";"         {return SEMICOLON;}
 "("         {return LEFT_PAREN;}
 ")"         {return RIGHT_PAREN;}
 "<-"        {return ASSIGN;}

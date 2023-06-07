@@ -10,7 +10,7 @@ int yylex(void);
 int yyerror(char* s);
 %}
 
-%token ASSIGN ARROW MINUS PLUS MULTIPLY GREATER_THAN HASH  RIGHT_PAREN LEFT_PAREN NEW OR ';' ','
+%token ASSIGN ARROW MINUS PLUS MULTIPLY GREATER_THAN HASH  RIGHT_PAREN LEFT_PAREN NEW OR SEMICOLON ','
 %token OBJECT INT CLASS END RETURN COND CONTINUE BREAK NOT NULLKEY
 %token NUM ID
 %start start
@@ -62,7 +62,7 @@ program:
 	@{
 		@i @program.symtab@ = symtab_init();
 	@}
-	| program selector ';' 
+	| program selector SEMICOLON 
 	@{
 		@i @selector.symtab@ = @program.1.symtab@;
 		@i @program.0.symtab@ = @selector.symtab_out@;
@@ -70,7 +70,7 @@ program:
 		@i @program.1.out@ = @program.0.out@;
 		@i @program.1.sl@ = @program.0.sl@;
 	@}
-	| program class ';'
+	| program class SEMICOLON
 	@{
 		@i @class.symtab@ = @program.1.symtab@;
 		@i @program.0.symtab@ = @class.symtab_out@;
@@ -102,14 +102,14 @@ member_list:
 	@{ 
 		@i @member_list.up@ = @member_list.symtab@;
 	@}
-	| member_list type ID ';'
+	| member_list type ID SEMICOLON
 	@{
 		@i @member_list.1.symtab@ = symtab_insert(@member_list.0.symtab@, @ID.id@, OBJ_VAR, complex_type_init(@type.bt@, NULL), @ID.lineNr@);
 
 		@i @member_list.0.up@ = @member_list.1.up@;
 		@i @member_list.1.className@ = @member_list.0.className@;
 	@}
-	| member_list method ';'
+	| member_list method SEMICOLON
 	@{
 		@i @member_list.1.symtab@ = @member_list.0.symtab@;
 		@i @member_list.0.up@ = @member_list.1.up@;
@@ -175,7 +175,7 @@ m_stat_list:
 		@i @return.symtab@ = @m_stat_list.symtab@;
 		@i @m_stat_list.varCount@ = 0;
 	@}
-	| stat ';' m_stat_list
+	| stat SEMICOLON m_stat_list
 	@{
 		@i @stat.symtab@ = @m_stat_list.0.symtab@;
 		@i @stat.returnType@ = @m_stat_list.returnType@;
@@ -193,7 +193,7 @@ g_stat_list:
 	@{
 		@i @g_stat_list.varCount@ = 0;
 	@}
-	| stat ';' g_stat_list
+	| stat SEMICOLON g_stat_list
 	@{
 		@i @stat.returnType@ = @g_stat_list.returnType@; 
 		@i @g_stat_list.1.returnType@ = @g_stat_list.0.returnType@;
@@ -267,7 +267,7 @@ guarded_list:
 	@{
 		@i @guarded_list.varCount@ = 0;
 	@}
-	| guarded_list guarded ';' 
+	| guarded_list guarded SEMICOLON 
 	@{
 		@i @guarded.symtab@ = symtab_namespace(@guarded_list.0.symtab@);
 		@i @guarded_list.1.symtab@ = @guarded_list.0.symtab@;
