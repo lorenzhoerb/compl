@@ -8,6 +8,6 @@ void defineObject(char *objName, char *className);
 void implementMethod(char *className, char *methodName, unsigned varCount);
 void setupMethodStack(unsigned varCount);
 void genReturn(void);
-void writeDecleration(int value, int destOffset);
+void writeDecleration(int destOffset, int value);
 
 #endif
