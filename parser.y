@@ -452,7 +452,7 @@ notexpr:
 	| NOT
 	@{
 		@i @notexpr.bt@ = INT_T;
-		@i @notexpr.n@ = NULL;
+		@i @notexpr.n@ = newNumNode(-1);
 	@}
 	| MINUS notexpr
 	@{
@@ -462,7 +462,7 @@ notexpr:
 	| NOT notexpr
 	@{
 		@i @notexpr.bt@ = INT_T;
-		@i @notexpr.n@ = NULL;
+		@i @notexpr.n@ = newOperatorNode(OP_NOT, @notexpr.1.n@, NULL);
 	@}
 	;
 

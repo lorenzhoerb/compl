@@ -76,7 +76,10 @@ void writeDeclerationReg(int offset, char *regname) {
 }
 
 void writeGreaterThan(char *reg1, char *reg2) {
-
+    printf("cmp %%%s, %%%s\n", reg2, reg1);
+    printf("setg %%al\n");
+    printf("and $1, %%rax\n");
+    writeNeg(-1, "rax");
 }
 
 void writeNeg(int factor, char *regname) {

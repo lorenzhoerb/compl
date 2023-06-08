@@ -46,7 +46,8 @@ enum {
     OP_GREATER = 9,
     OP_HASH = 10,
     OP_ASSIGN = 11,
-    OP_RETURN = 12
+    OP_RETURN = 12,
+    OP_NOT = 13
 
 };
 

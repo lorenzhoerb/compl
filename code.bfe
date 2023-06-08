@@ -8,7 +8,7 @@
 %}
 
 %start stat
-%term OP_REG = 1 OP_NUM = 2 OP_ID = 3 OP_ADD = 4 OP_MULT = 5 OP_NEG = 6 OP_UNARY = 7 OP_OR = 8 OP_GREATER = 9 OP_HASH = 10 OP_ASSIGN = 11 OP_RETURN = 12
+%term OP_REG = 1 OP_NUM = 2 OP_ID = 3 OP_ADD = 4 OP_MULT = 5 OP_NEG = 6 OP_UNARY = 7 OP_OR = 8 OP_GREATER = 9 OP_HASH = 10 OP_ASSIGN = 11 OP_RETURN = 12 OP_NOT = 13
 
 %%
 
@@ -36,11 +36,13 @@ reg: OP_OR(reg, num)                # 1 #   bnode->regname = kids[0]->regname; w
 reg: OP_ADD(num, reg)               # 1 #   bnode->regname = bnode->kids[1]->regname; writeOpNumReg("addq", kids[1]->regname, kids[0]->val);
 reg: OP_MULT(num, reg)              # 1 #   bnode->regname = kids[1]->regname; writeOpNumReg("imulq", kids[1]->regname, kids[0]->val);
 reg: OP_OR(num, reg)                # 1 #     bnode->regname = kids[1]->regname; writeOpNumReg("or", kids[1]->regname, kids[0]->val);
+reg: OP_UNARY(num, reg)             # 1 #   bnode->regname = kids[1]->regname; writeNeg(kids[0]->val, kids[1]->regname);
+reg: OP_GREATER(num, reg)           # 1 #   bnode->regname = "rax"; writeGreaterThan(kids[0]->regname, kids[1]->regname);
 
 reg: OP_ADD(reg, reg)               # 1 #   bnode->regname = kids[0]->regname; writeOpRegReg("addq", kids[0]->regname, kids[1]->regname);
 reg: OP_MULT(reg, reg)              # 1 #   bnode->regname = kids[0]->regname; writeOpRegReg("imulq", kids[0]->regname, kids[1]->regname);
 reg: OP_OR(reg, reg)                # 1 #   bnode->regname = kids[0]->regname; writeOpRegReg("or", kids[0]->regname, kids[1]->regname);
-reg: OP_UNARY(num, reg)             # 1 #   bnode->regname = kids[1]->regname; writeNeg(kids[0]->val, kids[1]->regname);
+reg: OP_GREATER(reg, reg)           # 1 #   bnode->regname = "rax"; writeGreaterThan(kids[0]->regname, kids[1]->regname);
 
 
 num: OP_NEG(num)                    # 1 #   bnode->val = -1*kids[0]->val;
