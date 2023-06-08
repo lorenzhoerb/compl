@@ -78,3 +78,7 @@ void writeDeclerationReg(int offset, char *regname) {
 void writeGreaterThan(char *reg1, char *reg2) {
 
 }
+
+void writeNeg(int factor, char *regname) {
+    writeOpNumReg("imulq", regname, factor);
+}

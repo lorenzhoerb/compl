@@ -268,7 +268,6 @@ stat:
 		@sematic symtab_check_assign(@stat.symtab@, @ID.id@, @expr.bt@, @ID.lineNr@);
 		@i @expr.symtab@ = @stat.symtab@;
 		@i @stat.n@ = newOperatorNode(OP_ASSIGN, newIdNode(@ID.id@, symtab_lookup_var_offset(@stat.symtab_out@, @ID.id@), NULL), @expr.n@);
-		@i @stat.n@ = NULL;
 		@i @stat.varCount@ = 1;
 	@}
 	| ID ASSIGN expr
@@ -374,8 +373,9 @@ expr:
 		@i @expr.n@ = newOperatorNode(OP_UNARY, @notexpr.n@, @term.n@);
 
 		@sematic {
-			if(@term.bt@ != INT_T)
-			fprintf(stderr, "Invalid type for not operator\n"); exit(3);
+			if(@term.bt@ != INT_T) {
+				fprintf(stderr, "Invalid type for not operator\n"); exit(3);
+			}
 		};
 	@}
 	| addexpr
