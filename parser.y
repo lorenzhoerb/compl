@@ -5,7 +5,7 @@
 #include "symt.h"
 #include "gentree.h"
 #include "assembly.h"
-#define REG_SIZE 7
+#define REG_SIZE 6
 
 int yylex(void);
 int yyerror(char* s);
@@ -25,7 +25,6 @@ int yyerror(char* s);
     "rcx",
     "r8",
     "r9",
-    "r10",
 };
 
 typedef struct reg_manager {
@@ -74,8 +73,8 @@ extern void invoke_burm(NODEPTR_TYPE root);
 @attributes { struct symbol_table *symtab; int returnType; struct s_node *n;} stats
 @attributes {struct symbol_table *symtab; int returnType; unsigned varCount; } m_stat_list  g_stat_list
 
+@traversal @preorder sematic
 @traversal @preorder codegen
-@traversal @postorder codegenpost
 
 %%
 start: program
@@ -157,8 +156,10 @@ method: type ID LEFT_PAREN pars RIGHT_PAREN m_stat_list
 		@i @m_stat_list.symtab@ = @pars.symtab_out@;
 		@i @m_stat_list.returnType@ = @type.bt@;
 
-		@codegen {
+		@sematic {
 			symtab_check_method_impl(@method.symtab@, @ID.id@, complex_type_init(@type.bt@, @pars.tl@), @ID.lineNr@);
+		}
+		@codegen {
 			implementMethod(@method.className@, @ID.id@, @m_stat_list.varCount@);
 		}
 	@}
@@ -197,7 +198,7 @@ pars:
 par: type ID
 	@{
 		@i @par.regPointer_out@ = @par.regPointer_in@ - @par.regPointer_in@ + nextParReg();
-		@i @par.symtab_out@ = symtab_insert_param(@par.symtab@, @ID.id@, @type.bt@, @par.regPointer_out@ ,@ID.lineNr@);
+		@i @par.symtab_out@ = symtab_insert_param(@par.symtab@, @ID.id@, @type.bt@, @par.regPointer_out@, @ID.lineNr@);
 		@i @par.bt@ = @type.bt@;
 	@}
 	;
@@ -227,6 +228,7 @@ g_stat_list:
 	escape
 	@{
 		@i @g_stat_list.varCount@ = 0;
+		@codegen clearTillParam();
 	@}
 	| stat SEMICOLON g_stat_list
 	@{
@@ -236,6 +238,7 @@ g_stat_list:
 		@i @g_stat_list.1.symtab@ = @stat.symtab_out@;
 
 		@i @g_stat_list.varCount@ = @stat.varCount@ + @g_stat_list.1.varCount@;
+		@codegen clearTillParam();
 	@}
 	;
 
@@ -249,7 +252,6 @@ stat:
 		@i @stat.n@ = @return.n@;
 
 		@i @stat.varCount@ = 0;
-		@codegen clearTillParam();
 	@}
 	| cond
 	@{
@@ -261,20 +263,20 @@ stat:
 		@i @stat.varCount@ = @cond.varCount@;
 	@}
 	| type ID ASSIGN expr
-		/* @i @stat.symtab_out@ = symtab_insert(@stat.symtab@, @ID.id@, VAR, complex_type_init(@type.bt@, NULL), @ID.lineNr@); */
 	@{
 		@i @stat.symtab_out@ = symtab_insert_local_var(@stat.symtab@, @ID.id@, @type.bt@, @ID.lineNr@);
-		@codegen symtab_check_assign(@stat.symtab@, @ID.id@, @expr.bt@, @ID.lineNr@);
+		@sematic symtab_check_assign(@stat.symtab@, @ID.id@, @expr.bt@, @ID.lineNr@);
 		@i @expr.symtab@ = @stat.symtab@;
 		@i @stat.n@ = newOperatorNode(OP_ASSIGN, newIdNode(@ID.id@, symtab_lookup_var_offset(@stat.symtab_out@, @ID.id@), NULL), @expr.n@);
+		@i @stat.n@ = NULL;
 		@i @stat.varCount@ = 1;
 	@}
 	| ID ASSIGN expr
 	@{
-		@codegen symtab_check_assign(@stat.symtab@, @ID.id@, @expr.bt@, @ID.lineNr@);
+		@sematic symtab_check_assign(@stat.symtab@, @ID.id@, @expr.bt@, @ID.lineNr@);
 		@i @expr.symtab@ = @stat.symtab@;
 		@i @stat.symtab_out@ = @stat.symtab@;
-		@i @stat.n@ = NULL;
+		@i @stat.n@ = newOperatorNode(OP_ASSIGN, newIdNode(@ID.id@, symtab_lookup_var_offset(@stat.symtab_out@, @ID.id@), NULL), @expr.n@);
 
 		@i @stat.varCount@ = 0;
 	@}
@@ -325,7 +327,7 @@ guarded:
 
 		@i @guarded.varCount@ = @g_stat_list.varCount@;
 
-		@codegen {
+		@sematic {
 			if(@expr.bt@ != INT_T) {
 				fprintf(stderr, "Type of expression in guarded must be type int\n");
 				exit(3);
@@ -352,9 +354,11 @@ return: RETURN expr
 		@i @expr.symtab@ = @return.symtab@;
 		@i @return.n@ = newOperatorNode(OP_RETURN, @expr.n@, NULL);
 
-		@codegen {
+		@sematic {
 			is_return_valid(@return.returnType@, @expr.bt@);
 			printLocalVars(@return.symtab@);
+		}
+		@codegen {
 			genReturn();
 		}
 	@}
@@ -369,7 +373,7 @@ expr:
 
 		@i @expr.n@ = newOperatorNode(OP_UNARY, @notexpr.n@, @term.n@);
 
-		@codegen {
+		@sematic {
 			if(@term.bt@ != INT_T)
 			fprintf(stderr, "Invalid type for not operator\n"); exit(3);
 		};
@@ -402,7 +406,7 @@ expr:
 
 		@i @expr.bt@ = INT_T;
 		@i @expr.n@ = newOperatorNode(OP_GREATER, @term.0.n@, @term.1.n@);
-		@codegen check_binop_types(@term.0.bt@, @term.1.bt@);
+		@sematic check_binop_types(@term.0.bt@, @term.1.bt@);
 	@}
 	| term HASH term
 	@{
@@ -413,7 +417,7 @@ expr:
 
 		@i @expr.n@ = newOperatorNode(OP_HASH, @term.0.n@, @term.1.n@);
 
-		@codegen {
+		@sematic {
 			if(@term.0.bt@ != @term.1.bt@) {
 				fprintf(stderr, "Error: Invalid types for # operator. Both types must be the same\n");
 				exit(3);
@@ -469,7 +473,7 @@ addexpr:
 		@i @term.1.symtab@ = @addexpr.symtab@;
 
 		@i @addexpr.bt@ = INT_T;
-		@codegen check_binop_types(@term.0.bt@, @term.1.bt@);
+		@sematic check_binop_types(@term.0.bt@, @term.1.bt@);
 		@i @addexpr.n@ = newOperatorNode(OP_ADD, @term.0.n@, @term.1.n@);
 	@}
 	| addexpr PLUS term
@@ -478,7 +482,7 @@ addexpr:
 		@i @addexpr.1.symtab@ = @addexpr.0.symtab@;
 
 		@i @addexpr.bt@ = INT_T;
-		@codegen check_binop_types(@addexpr.1.bt@, @term.bt@);
+		@sematic check_binop_types(@addexpr.1.bt@, @term.bt@);
 		@i @addexpr.0.n@ = newOperatorNode(OP_ADD, @addexpr.1.n@, @term.n@);
 	@}
 	;
@@ -493,7 +497,7 @@ multexpr:
 
 		@i @multexpr.n@ = newOperatorNode(OP_MULT, @term.0.n@, @term.1.n@);
 
-		@codegen check_binop_types(@term.0.bt@, @term.1.bt@);
+		@sematic check_binop_types(@term.0.bt@, @term.1.bt@);
 	@}
 	| multexpr MULTIPLY term
 	@{
@@ -504,7 +508,7 @@ multexpr:
 
 		@i @multexpr.0.n@ = newOperatorNode(OP_MULT, @multexpr.1.n@, @term.n@);
 
-		@codegen check_binop_types(@multexpr.1.bt@, @term.bt@);
+		@sematic check_binop_types(@multexpr.1.bt@, @term.bt@);
 	@}
 	;
 
@@ -517,7 +521,7 @@ orexpr:
 		@i @orexpr.bt@ = INT_T;
 		@i @orexpr.n@ = newOperatorNode(OP_OR, @term.0.n@, @term.1.n@);
 
-		@codegen check_binop_types(@term.0.bt@, @term.1.bt@);
+		@sematic check_binop_types(@term.0.bt@, @term.1.bt@);
 	@}
 	| orexpr OR term
 	@{
@@ -526,7 +530,7 @@ orexpr:
 
 		@i @orexpr.bt@ = INT_T;
 		@i @orexpr.n@ = newOperatorNode(OP_OR, @orexpr.1.n@, @term.n@);
-		@codegen check_binop_types(@orexpr.1.bt@, @term.bt@);
+		@sematic check_binop_types(@orexpr.1.bt@, @term.bt@);
 	@}
 	;
 

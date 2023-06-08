@@ -16,5 +16,6 @@ void writeOpNumReg(char *op, char *regname, int val);
 void writeOpRegReg(char *op, char *srcReg, char *destReg);
 void writeReturnNum(int val);
 void writeReturnReg(char *regname);
+void writeDeclerationReg(int offset, char *regname);
 
 #endif

@@ -2,7 +2,7 @@
 #define SYMT
 #include <stdbool.h>
 #include <stdlib.h>
-#define DEBUG 1
+#define DEBUG 0
 
 enum sym_kind { VAR, METHOD, PARAMETER, OBJ_VAR, CLASS_NAME };
 

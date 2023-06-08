@@ -23,24 +23,28 @@ void defineObject(char *objName, char *className) {
 void implementMethod(char *className, char *methodName, unsigned varCount) {
     printf("\n.type %s_%s, @function\n", className, methodName);
     printf("%s_%s:\n", className, methodName);
+    printf("pushq %%rbp\n");
+    printf("movq %%rsp, %%rbp\n");
     setupMethodStack(varCount);
     printf("\n");
 }
 
 void setupMethodStack(unsigned varCount) {
-    printf("enter $%d, $0\n", 8*varCount);
+    if(varCount > 0) {
+        printf("subq $%d, %%rsp\n", 8*varCount);
+    }
 }
 
 void writeDecleration( int destOffset, int value) {
-    printf("movq $%d, -%d(%%sbp)\n", value, offsetToAddrOffset(destOffset));
+    printf("movq $%d, -%d(%%rbp)\n", value, offsetToAddrOffset(destOffset));
 }
 
 void genReturn() {
-    printf("ret\n\n");
+    printf("leave\nret\n\n");
 }
 
 void writeLoadId(int offset, char *destReg) {
-    printf("movq -%d(%%sbp), %%%s\n", offsetToAddrOffset(offset), destReg);
+    printf("movq -%d(%%rbp), %%%s\n", offsetToAddrOffset(offset), destReg);
 }
 
 int offsetToAddrOffset(int offset) {
@@ -65,4 +69,8 @@ void writeReturnNum(int val) {
 
 void writeReturnReg(char *regname) {
     printf("movq %%%s, %%rax\n", regname);
+}
+
+void writeDeclerationReg(int offset, char *regname) {
+    printf("movq %%%s, -%d(%%rbp)\n", regname, offsetToAddrOffset(offset));
 }

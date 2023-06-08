@@ -400,5 +400,6 @@ int symtab_lookup_var_offset(struct symbol_table *symtab, char *name) {
 
 bool symtab_is_kind(symtab *symtab, char *name, enum sym_kind kind) {
   sym_entry *entry = symtab_lookup(symtab, name);
+  if(entry == NULL) return true;
   return entry->kind == kind;
 }
