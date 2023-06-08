@@ -508,7 +508,7 @@ multexpr:
 
 		@i @multexpr.0.n@ = newOperatorNode(OP_MULT, @multexpr.1.n@, @term.n@);
 
-		@ sematic check_binop_types(@multexpr.1.bt@, @term.bt@);
+		@sematic check_binop_types(@multexpr.1.bt@, @term.bt@);
 	@}
 	;
 
