@@ -74,3 +74,7 @@ void writeReturnReg(char *regname) {
 void writeDeclerationReg(int offset, char *regname) {
     printf("movq %%%s, -%d(%%rbp)\n", regname, offsetToAddrOffset(offset));
 }
+
+void writeGreaterThan(char *reg1, char *reg2) {
+
+}

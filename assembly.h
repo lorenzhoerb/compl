@@ -17,5 +17,6 @@ void writeOpRegReg(char *op, char *srcReg, char *destReg);
 void writeReturnNum(int val);
 void writeReturnReg(char *regname);
 void writeDeclerationReg(int offset, char *regname);
+void writeGreaterThan(char *reg1, char *reg2);
 
 #endif
