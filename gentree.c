@@ -18,25 +18,16 @@ treenode *newOperatorNode(int op, treenode *left, treenode *right) {
     return newNode;
 }
 
-treenode *newRegisterNode(char* regname) {
-    treenode *newNode = newOperatorNode(OP_REG, NULL, NULL);
-    newNode->regname = regname;
-    return newNode;
-}
-
-
 treenode *newNumNode(long num) {
     treenode *newNode = newOperatorNode(OP_NUM, NULL, NULL);
     newNode->val = num;
     return newNode;
 }
 
-treenode *newIdNode(char *id, int offset, const char *regname) {
+treenode *newIdNode(char *id, int offset, enum VAR_TYPE type) {
     treenode *newNode = newOperatorNode(OP_ID, NULL, NULL);
     newNode->id = id;
     newNode->val = offset;
-    if(regname != NULL) {
-        newNode->regname = regname;
-    }
+    newNode->type = type;
     return newNode;
 }

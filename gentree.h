@@ -10,6 +10,13 @@ typedef struct burm_state *STATEPTR_TYPE;
 
 #include <stdlib.h>
 #include <stdio.h>
+#include "assembly.h"
+
+enum VAR_TYPE {
+    LOC,
+    OBJ,
+    PAR
+};
 
 typedef struct s_node {
     int op;
@@ -17,6 +24,7 @@ typedef struct s_node {
     STATEPTR_TYPE state;
     char *regname;
     char *id;
+    enum VAR_TYPE type;
     int val;
 } treenode;
 
@@ -30,9 +38,8 @@ typedef treenode *treenodep;
 #define PANIC		printf
 
 treenode *newOperatorNode(int op, treenode *left, treenode *right);
-treenode *newRegisterNode(char* regname);
 treenode *newNumNode(long num);
-treenode *newIdNode(char *id, int offset, const char *regname);
+treenode *newIdNode(char *id, int offset, enum VAR_TYPE type);
 
 enum {
     OP_REG = 1,

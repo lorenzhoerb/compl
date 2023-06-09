@@ -13,11 +13,14 @@ void writeLoadId(int offset, char *destReg);
 int offsetToAddrOffset(int offset);
 void writeAddNumToReg(char *regname, int val);
 void writeOpNumReg(char *op, char *regname, int val);
-void writeOpRegReg(char *op, char *srcReg, char *destReg);
+void writeOpRegReg(char *op, char *srcReg, char *dest);
 void writeReturnNum(int val);
 void writeReturnReg(char *regname);
 void writeDeclerationReg(int offset, char *regname);
 void writeGreaterThan(char *reg1, char *reg2);
 void writeNeg(int factor, char *regname);
+void writeLoadFromStack(int offset, char *destReg);
+void writeOpRegRegDest(char *op, char *reg1, char *reg2, char *dest);
+void writeOPNumRegDest(char *op, int val, char *reg, char *dest);
 
 #endif

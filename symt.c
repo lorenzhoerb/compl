@@ -398,6 +398,11 @@ int symtab_lookup_var_offset(struct symbol_table *symtab, char *name) {
   return entry->varOffset;
 }
 
+enum sym_kind symtab_lookup_kind(symtab *symtab, char *name) {
+  sym_entry *entry = symtab_lookup(symtab, name);
+  return entry->kind;
+}
+
 bool symtab_is_kind(symtab *symtab, char *name, enum sym_kind kind) {
   sym_entry *entry = symtab_lookup(symtab, name);
   if(entry == NULL) return true;

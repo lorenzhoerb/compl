@@ -160,4 +160,6 @@ sym_entry *symtab_next(symtab_itr *itr);
 void printLocalVars(symtab *symtab);
 
 bool symtab_is_kind(symtab *symtab, char *name, enum sym_kind kind);
+
+enum sym_kind symtab_lookup_kind(symtab *symtab, char *name);
 #endif

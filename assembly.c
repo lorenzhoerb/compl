@@ -56,6 +56,7 @@ void writeAddNumToReg(char *regname, int val) {
 }
 
 void writeOpNumReg(char *op, char *regname, int val) {
+
     printf("%s $%d, %%%s\n", op, val, regname);
 }
 
@@ -84,4 +85,18 @@ void writeGreaterThan(char *reg1, char *reg2) {
 
 void writeNeg(int factor, char *regname) {
     writeOpNumReg("imulq", regname, factor);
+}
+
+void writeLoadFromStack(int offset, char *destReg) {
+    printf("movq -%d(%%rbp), %%%s\n", offsetToAddrOffset(offset), destReg);
+}
+
+void writeOpRegRegDest(char *op, char *reg1, char *reg2, char *dest) {
+    printf("movq %%%s, %%%s\n", reg2, dest);
+    printf("%s %%%s, %%%s\n", op, reg1, dest);
+}
+
+void writeOPNumRegDest(char *op, int val, char *reg, char *dest) {
+    printf("movq $%d, %%%s\n", val, dest);
+    printf("%s %%%s, %%%s\n", op, reg, dest);
 }

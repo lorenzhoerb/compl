@@ -18,33 +18,13 @@ int yyerror(char* s);
 %start start
 
 %{
-	const char* regs[REG_SIZE] = {
-    "rdi",
-    "rsi",
-    "rdx",
-    "rcx",
-    "r8",
-    "r9",
-};
 
-typedef struct reg_manager {
-    int parCount;
-    int regPointer;
-} reg_manager_t;
-
-reg_manager_t *regm = NULL;
-
-const char *resolveReg(int regIndex);
-int nextReg(void);
-int nextParReg(void);
-void initRegManager(void);
-void clearTillParam(void);
-int getIdReg(struct symbol_table *symtab, char *name);
+enum VAR_TYPE resolveType(enum sym_kind kind);
 
 %}
 
 %{
-extern void invoke_burm(NODEPTR_TYPE root);
+extern void invoke_burm(NODEPTR_TYPE root, unsigned parCount);
 %}
 
 @attributes { char* id; unsigned lineNr; } ID
@@ -71,7 +51,8 @@ extern void invoke_burm(NODEPTR_TYPE root);
 @attributes { struct symbol_table *symtab; int returnType; struct s_node *n;} return
 
 @attributes { struct symbol_table *symtab; int returnType; struct s_node *n;} stats
-@attributes {struct symbol_table *symtab; int returnType; unsigned varCount; } m_stat_list  g_stat_list
+@attributes {struct symbol_table *symtab; int returnType; unsigned varCount; } g_stat_list
+@attributes {struct symbol_table *symtab; int returnType; unsigned varCount; unsigned parCount;} m_stat_list
 
 @traversal @preorder sematic
 @traversal @preorder codegen
@@ -152,6 +133,7 @@ method: type ID LEFT_PAREN pars RIGHT_PAREN m_stat_list
 	@{
 		@i @pars.symtab@ = symtab_namespace(@method.symtab@);
 		@i @pars.regPointer_in@ = 0;
+		@i @m_stat_list.parCount@ = @pars.regPointer_out@ + 1;
 
 		@i @m_stat_list.symtab@ = @pars.symtab_out@;
 		@i @m_stat_list.returnType@ = @type.bt@;
@@ -197,7 +179,7 @@ pars:
 
 par: type ID
 	@{
-		@i @par.regPointer_out@ = @par.regPointer_in@ - @par.regPointer_in@ + nextParReg();
+		@i @par.regPointer_out@ = @par.regPointer_in@;
 		@i @par.symtab_out@ = symtab_insert_param(@par.symtab@, @ID.id@, @type.bt@, @par.regPointer_out@, @ID.lineNr@);
 		@i @par.bt@ = @type.bt@;
 	@}
@@ -209,7 +191,7 @@ m_stat_list:
 		@i @return.returnType@ = @m_stat_list.returnType@;
 		@i @return.symtab@ = @m_stat_list.symtab@;
 		@i @m_stat_list.varCount@ = 0;
-		@codegen if(@return.n@ != NULL) invoke_burm(@return.n@);
+		@codegen if(@return.n@ != NULL) invoke_burm(@return.n@, @m_stat_list.parCount@);
 	@}
 	| stat SEMICOLON m_stat_list
 	@{
@@ -219,8 +201,9 @@ m_stat_list:
 		@i @m_stat_list.1.returnType@ = @m_stat_list.0.returnType@;
 
 		@i @m_stat_list.varCount@ = @stat.varCount@ + @m_stat_list.1.varCount@;
+		@i @m_stat_list.1.parCount@ = @m_stat_list.0.parCount@;
 
-		@codegen if(@stat.n@ != NULL) invoke_burm(@stat.n@);
+		@codegen if(@stat.n@ != NULL) invoke_burm(@stat.n@, @m_stat_list.parCount@);
 	@}
 	;
 
@@ -228,7 +211,6 @@ g_stat_list:
 	escape
 	@{
 		@i @g_stat_list.varCount@ = 0;
-		@codegen clearTillParam();
 	@}
 	| stat SEMICOLON g_stat_list
 	@{
@@ -238,7 +220,6 @@ g_stat_list:
 		@i @g_stat_list.1.symtab@ = @stat.symtab_out@;
 
 		@i @g_stat_list.varCount@ = @stat.varCount@ + @g_stat_list.1.varCount@;
-		@codegen clearTillParam();
 	@}
 	;
 
@@ -267,7 +248,7 @@ stat:
 		@i @stat.symtab_out@ = symtab_insert_local_var(@stat.symtab@, @ID.id@, @type.bt@, @ID.lineNr@);
 		@sematic symtab_check_assign(@stat.symtab@, @ID.id@, @expr.bt@, @ID.lineNr@);
 		@i @expr.symtab@ = @stat.symtab@;
-		@i @stat.n@ = newOperatorNode(OP_ASSIGN, newIdNode(@ID.id@, symtab_lookup_var_offset(@stat.symtab_out@, @ID.id@), NULL), @expr.n@);
+		@i @stat.n@ = newOperatorNode(OP_ASSIGN, newIdNode(@ID.id@, symtab_lookup_var_offset(@stat.symtab_out@, @ID.id@), LOC), @expr.n@);
 		@i @stat.varCount@ = 1;
 	@}
 	| ID ASSIGN expr
@@ -275,7 +256,7 @@ stat:
 		@sematic symtab_check_assign(@stat.symtab@, @ID.id@, @expr.bt@, @ID.lineNr@);
 		@i @expr.symtab@ = @stat.symtab@;
 		@i @stat.symtab_out@ = @stat.symtab@;
-		@i @stat.n@ = newOperatorNode(OP_ASSIGN, newIdNode(@ID.id@, symtab_lookup_var_offset(@stat.symtab_out@, @ID.id@), NULL), @expr.n@);
+		@i @stat.n@ = newOperatorNode(OP_ASSIGN, newIdNode(@ID.id@, symtab_lookup_var_offset(@stat.symtab_out@, @ID.id@), LOC), @expr.n@);
 
 		@i @stat.varCount@ = 0;
 	@}
@@ -555,7 +536,7 @@ term:
 	| ID 
 	@{
 		@i @term.bt@ = symtab_lookup_return_type(@term.symtab@, @ID.id@);
-		@i @term.n@ = newIdNode(@ID.id@, symtab_is_kind(@term.symtab@, @ID.id@, PARAMETER) ? -1 : symtab_lookup_var_offset(@term.symtab@, @ID.id@), regs[getIdReg(@term.symtab@, @ID.id@)]);
+		@i @term.n@ = newIdNode(@ID.id@, symtab_lookup_var_offset(@term.symtab@, @ID.id@), resolveType(symtab_lookup_kind(@term.symtab@, @ID.id@)));
 
 	@}
 	// TODO: remove NULL from ID
@@ -600,53 +581,18 @@ type:
 	;
 %%
 
-int getIdReg(struct symbol_table *symtab, char *name) {
-	int regIndex;
-	sym_entry *entry = symtab_lookup(symtab, name);
-	if(entry->kind == PARAMETER) {
-		regIndex = entry->varOffset;
-	} else {
-		regIndex = nextReg();
+enum VAR_TYPE resolveType(enum sym_kind kind) {
+	switch(kind) {
+		case VAR:
+			return VAR;
+		case PARAMETER:
+			return PAR;
+		case OBJ_VAR:
+			return VAR;
+		default:
+			fprintf(stderr, "Error: could not resolve type sym_kind: '%d'\n", kind);
+			exit(3);
 	}
-	return regIndex;
-}
-
-void clearTillParam(void) {
-	regm->regPointer = regm->parCount;
-}
-
-const char *resolveReg(int regIndex) {
-    if(regIndex < 0 || regIndex >= REG_SIZE) {
-        return NULL;
-    } else {
-        return regs[regIndex];
-    }
-}
-
-int nextReg(void) {
-    if(regm == NULL) {
-        initRegManager();
-    }
-
-    if(regm->regPointer >= REG_SIZE) {
-        fprintf(stderr, "Error: No more available Register to assign");
-        exit(3);
-    }
-    int regPointer = regm->regPointer;
-    regm->regPointer++;
-    return regPointer;
-}
-
-int nextParReg(void) {
-    int next = nextReg();
-    regm->parCount++;
-    return next;
-}
-
-void initRegManager(void) {
-    regm = malloc(sizeof(reg_manager_t));
-    regm->parCount = 0;
-    regm->regPointer = 0;
 }
 
 int yyerror(char *e)

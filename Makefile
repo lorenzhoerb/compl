@@ -1,6 +1,6 @@
 NAME=codea
 LEX=flex
-OBJECTS = lex.yy.o oxout.tab.o symt.o $(NAME)_iburg.o gentree.o assembly.o
+OBJECTS = lex.yy.o oxout.tab.o symt.o $(NAME)_iburg.o gentree.o assembly.o reg.o
 
 all: $(NAME)
 
