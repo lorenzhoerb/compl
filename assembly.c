@@ -44,16 +44,8 @@ void genReturn() {
     printf("leave\nret\n\n");
 }
 
-void writeLoadId(int offset, char *destReg) {
-    printf("movq -%d(%%rbp), %%%s\n", offsetToAddrOffset(offset), destReg);
-}
-
 int offsetToAddrOffset(int offset) {
     return (1+offset)*8;
-}
-
-void writeAddNumToReg(char *regname, int val) {
-    fprintf(stdout, "addq $%d, %%%s\n", val, regname);
 }
 
 void writeOpNumReg(char *op, char *regname, int val) {
