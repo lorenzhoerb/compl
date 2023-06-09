@@ -2,8 +2,9 @@
 #define ASSEMBLY_H
 
 #include <stdio.h>
+#include "symt.h"
 
-void defineClassSection(char *className, char **selectors, unsigned size);
+void defineClassSection(char *className, symtab *symtab);
 void defineObject(char *objName, char *className);
 void implementMethod(char *className, char *methodName, unsigned varCount);
 void setupMethodStack(unsigned varCount);

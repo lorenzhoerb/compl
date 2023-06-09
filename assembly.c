@@ -1,14 +1,20 @@
 #include "assembly.h"
 #include <string.h>
 
-void defineClassSection(char *className, char **selectors, unsigned size) {
+void defineClassSection(char *className, symtab *symtab) {
     printf(".data\n");
     printf("# define class %s\n", className);
     printf("%s:\n", className);
-    int i;
-    for (i = 0; i < size; i++) {
-        printf("\t .quad %s_%s\n", className, selectors[i]);
+
+    symtab_itr *itr = symtab_iter(symtab);
+    sym_entry *entry;
+
+    for (entry = symtab_next(itr); entry != NULL; entry = symtab_next(itr)) {
+        if(entry->kind == METHOD && entry->methodUsed == true) {
+            printf("\t .quad %s_%s\n", className, entry->name);
+        }
     }
+
     printf("\n\n.text\n");
     printf(".globl %s\n\n", className);
     printf("# method implementation of class %s\n", className);

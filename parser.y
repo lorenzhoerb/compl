@@ -102,7 +102,7 @@ class: CLASS ID member_list END
 		@i @class.symtab_out@ = symtab_insert(@class.symtab@, @ID.id@, CLASS_NAME, NULL, @ID.lineNr@);
 		@i @member_list.symtab@ = symtab_namespace(@class.symtab_in@);
 		@i @member_list.className@ = @ID.id@;
-		@codegen defineClassSection(@ID.id@, @class.0.sl@->selectors, @class.0.sl@->size);
+		@codegen defineClassSection(@ID.id@, @member_list.up@);
 	@}
 	;
 
