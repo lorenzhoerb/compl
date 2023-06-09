@@ -158,3 +158,19 @@ void writeGreaterThanRegNum(char *reg, int val, char *dest) {
     printf("and $1, %%%s\n", dest);
     writeNeg(-1, dest);
 }
+
+void writeNotEqualsRegReg(char *reg1, char *reg2, char *dest) {
+    char *bitRegDest = regToLowerBitReg(dest);
+    printf("cmp %%%s, %%%s\n", reg2, reg1);
+    printf("setne %%%s\n", bitRegDest);
+    printf("and $1, %%%s\n", dest);
+    writeNeg(-1, dest);
+}
+
+void writeNotEqualsRegNum(char *reg, int val, char *dest) {
+    char *bitRegDest = regToLowerBitReg(dest);
+    printf("cmp $%d, %%%s\n", val, reg);
+    printf("setne %%%s\n", bitRegDest);
+    printf("and $1, %%%s\n", dest);
+    writeNeg(-1, dest);
+}

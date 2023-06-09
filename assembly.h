@@ -25,5 +25,7 @@ void writeOPNumRegDest(char *op, int val, char *reg, char *dest);
 char *regToLowerBitReg(char *reg);
 void writeGreaterThanNumReg(int val, char *reg, char *dest);
 void writeGreaterThanRegNum(char *reg, int val, char *dest);
+void writeNotEqualsRegReg(char *reg1, char *reg2, char *dest);
+void writeNotEqualsRegNum(char *reg, int val, char *dest);
 
 #endif
