@@ -531,7 +531,7 @@ term:
 	| NULLKEY
 	@{
 		@i @term.bt@ = OBJECT_T;
-		@i @term.n@ = NULL;
+		@i @term.n@ = newNumNode(0);
 	@}
 	| ID 
 	@{
