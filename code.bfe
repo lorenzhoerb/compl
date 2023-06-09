@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <stdbool.h>
 
 #include "gentree.h"
 #include "assembly.h"
@@ -30,18 +31,18 @@ reg: OP_ASSIGN(OP_ID, reg)          # 1 #   writeDeclerationReg(bnode->kids[0]->
 reg: OP_RETURN(num)                 # 1 #   writeReturnNum(kids[0]->val);
 reg: OP_RETURN(reg)                 # 1 #   writeReturnReg(kids[0]->regname);
 
-reg: OP_ADD(reg, num)               # 1 #   freeReg(regm, kids[0]->regname); bnode->regname = newReg(regm); writeOPNumRegDest("addq", kids[1]->val, kids[0]->regname, bnode->regname);
-reg: OP_MULT(reg, num)              # 1 #   freeReg(regm, kids[0]->regname); bnode->regname = newReg(regm); writeOPNumRegDest("imulq", kids[1]->val, kids[0]->regname, bnode->regname);
-reg: OP_OR(reg, num)                # 1 #   freeReg(regm, kids[0]->regname); bnode->regname = newReg(regm); writeOPNumRegDest("or", kids[1]->val, kids[0]->regname, bnode->regname);
+reg: OP_ADD(reg, num)               # 1 #   freeAndNewReg(bnode, true, false); writeOPNumRegDest("addq", kids[1]->val, kids[0]->regname, bnode->regname);
+reg: OP_MULT(reg, num)              # 1 #   freeAndNewReg(bnode, true, false); bnode->regname = newReg(regm); writeOPNumRegDest("imulq", kids[1]->val, kids[0]->regname, bnode->regname);
+reg: OP_OR(reg, num)                # 1 #   freeAndNewReg(bnode, true, false); bnode->regname = newReg(regm); writeOPNumRegDest("or", kids[1]->val, kids[0]->regname, bnode->regname);
 
-reg: OP_ADD(num, reg)               # 1 #   freeReg(regm, kids[1]->regname); bnode->regname = newReg(regm); writeOPNumRegDest("addq", kids[0]->val, kids[1]->regname, bnode->regname);
-reg: OP_MULT(num, reg)              # 1 #   freeReg(regm, kids[1]->regname); bnode->regname = newReg(regm); writeOPNumRegDest("imulq", kids[0]->val, kids[1]->regname, bnode->regname);
-reg: OP_OR(num, reg)                # 1 #   freeReg(regm, kids[1]->regname); bnode->regname = newReg(regm); writeOPNumRegDest("or", kids[0]->val, kids[1]->regname, bnode->regname);
+reg: OP_ADD(num, reg)               # 1 #   freeAndNewReg(bnode, false, true); writeOPNumRegDest("addq", kids[0]->val, kids[1]->regname, bnode->regname);
+reg: OP_MULT(num, reg)              # 1 #   freeAndNewReg(bnode, false, true); writeOPNumRegDest("imulq", kids[0]->val, kids[1]->regname, bnode->regname);
+reg: OP_OR(num, reg)                # 1 #   freeAndNewReg(bnode, false, true); writeOPNumRegDest("or", kids[0]->val, kids[1]->regname, bnode->regname);
 reg: OP_UNARY(num, reg)             # 1 #   bnode->regname = kids[1]->regname; writeNeg(kids[0]->val, kids[1]->regname);
 reg: OP_GREATER(num, reg)           # 1 #   bnode->regname = "rax"; writeGreaterThan(kids[0]->regname, kids[1]->regname);
 
-reg: OP_ADD(reg, reg)               # 1 #   freeReg(regm, kids[0]->regname); freeReg(regm, kids[1]->regname); bnode->regname = newReg(regm); writeOpRegRegDest("addq", kids[0]->regname, kids[1]->regname, bnode->regname);
-reg: OP_MULT(reg, reg)              # 1 #   freeReg(regm, kids[0]->regname); freeReg(regm, kids[1]->regname); bnode->regname = newReg(regm); writeOpRegRegDest("imulq", kids[0]->regname, kids[1]->regname, bnode->regname);
+reg: OP_ADD(reg, reg)               # 1 #   freeAndNewReg(bnode, true, true); writeOpRegRegDest("addq", kids[0]->regname, kids[1]->regname, bnode->regname);
+reg: OP_MULT(reg, reg)              # 1 #   freeAndNewReg(bnode, true, true); writeOpRegRegDest("imulq", kids[0]->regname, kids[1]->regname, bnode->regname);
 reg: OP_OR(reg, reg)                # 1 #   bnode->regname = kids[0]->regname; writeOpRegReg("or", kids[0]->regname, kids[1]->regname);
 reg: OP_GREATER(reg, reg)           # 1 #   bnode->regname = "rax"; writeGreaterThan(kids[0]->regname, kids[1]->regname);
 
@@ -57,6 +58,12 @@ extern treenode *root;
 extern int yyparse(void);
 void burm_reduce(NODEPTR_TYPE bnode, int goalnt);
 regm_t *regm;
+
+void freeAndNewReg(treenode *n, bool k0, bool k1) {
+    if(k0) freeReg(regm, n->kids[0]->regname);
+    if(k1) freeReg(regm, n->kids[1]->regname);
+    n->regname = newReg(regm);
+}
 
 char *loadId(treenode *idNode) {
     int offset = idNode->val;
