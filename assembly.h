@@ -2,9 +2,10 @@
 #define ASSEMBLY_H
 
 #include <stdio.h>
+#include "clist.h"
 #include "symt.h"
 
-void defineClassSection(char *className, symtab *symtab);
+void defineClassSection(char *className, symtab *symtab, clist_t *usedMethods);
 void defineObject(char *objName, char *className);
 void implementMethod(char *className, char *methodName, unsigned varCount);
 void setupMethodStack(unsigned varCount);

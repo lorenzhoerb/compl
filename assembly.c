@@ -1,7 +1,7 @@
 #include "assembly.h"
 #include <string.h>
 
-void defineClassSection(char *className, symtab *symtab) {
+void defineClassSection(char *className, symtab *symtab, clist_t *usedMethods) {
     printf(".data\n");
     printf("# define class %s\n", className);
     printf("%s:\n", className);
@@ -10,8 +10,12 @@ void defineClassSection(char *className, symtab *symtab) {
     sym_entry *entry;
 
     for (entry = symtab_next(itr); entry != NULL; entry = symtab_next(itr)) {
-        if(entry->kind == METHOD && entry->methodUsed == true) {
-            printf("\t .quad %s_%s\n", className, entry->name);
+        if(entry->kind == METHOD) {
+            if(clist_contains(usedMethods, entry->name)) {
+                printf("\t .quad %s_%s\n", className, entry->name);
+            } else {
+                printf("\t .space 8\n");
+            }
         }
     }
 

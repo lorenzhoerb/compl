@@ -1,6 +1,6 @@
 NAME=codea
 LEX=flex
-OBJECTS = lex.yy.o oxout.tab.o symt.o $(NAME)_iburg.o gentree.o assembly.o reg.o
+OBJECTS = lex.yy.o oxout.tab.o symt.o $(NAME)_iburg.o gentree.o assembly.o reg.o clist.o
 
 all: $(NAME)
 
@@ -9,6 +9,9 @@ $(NAME): $(OBJECTS)
 
 symt.o: symt.c symt.h
 	gcc -g -c -pedantic -Wall -o symt.o symt.c
+
+clist.o: clist.c clist.h
+	gcc -g -c -pedantic -Wall -o clist.o clist.c
 
 gentree.o: gentree.c gentree.h
 	gcc -g -c -pedantic -Wall -o gentree.o gentree.c

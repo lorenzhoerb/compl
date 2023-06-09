@@ -5,7 +5,7 @@
 #include "symt.h"
 #include "gentree.h"
 #include "assembly.h"
-#define REG_SIZE 6
+#include "clist.h"
 
 int yylex(void);
 int yyerror(char* s);
@@ -32,7 +32,7 @@ extern void invoke_burm(NODEPTR_TYPE root, unsigned parCount);
 @attributes { struct symbol_table *symtab; struct symbol_table *symtab_in; struct symbol_table *symtab_out; struct selector_list *sl;} class 
 @attributes { struct symbol_table *symtab; int returnType; unsigned varCount;} guarded guarded_list cond 
 @attributes { struct symbol_table *symtab;} expr_list
-@attributes { struct symbol_table *symtab; char *className;} method
+@attributes { struct symbol_table *symtab; char *className; struct clist *usedMethodsIn; struct clist *usedMethodsOut;} method
 @attributes { int bt;} type
 @attributes { int bt; struct s_node *n;} notexpr
 @attributes { struct type_list *tl;} type_list
@@ -44,7 +44,7 @@ extern void invoke_burm(NODEPTR_TYPE root, unsigned parCount);
 @attributes { struct symbol_table *symtab; struct symbol_table *symtab_out;} selector
 @attributes { struct symbol_table *symtab; struct symbol_table *out; struct selector_list *sl;} program
 @attributes { struct symbol_table *symtab;} start
-@attributes { struct symbol_table *symtab; struct symbol_table *up; char *className;} member_list 
+@attributes { struct symbol_table *symtab; struct symbol_table *up; char *className; struct clist *usedMethods;} member_list 
 
 @attributes { struct symbol_table *symtab; struct symbol_table *symtab_out; int returnType; struct s_node *n; unsigned varCount;} stat 
 
@@ -102,7 +102,7 @@ class: CLASS ID member_list END
 		@i @class.symtab_out@ = symtab_insert(@class.symtab@, @ID.id@, CLASS_NAME, NULL, @ID.lineNr@);
 		@i @member_list.symtab@ = symtab_namespace(@class.symtab_in@);
 		@i @member_list.className@ = @ID.id@;
-		@codegen defineClassSection(@ID.id@, @member_list.up@);
+		@codegen defineClassSection(@ID.id@, @member_list.up@, @member_list.usedMethods@);
 	@}
 	;
 
@@ -110,6 +110,8 @@ member_list:
 	  /* empty */
 	@{ 
 		@i @member_list.up@ = @member_list.symtab@;
+
+		@i @member_list.usedMethods@ = clist_init();
 	@}
 	| member_list type ID SEMICOLON
 	@{
@@ -117,6 +119,8 @@ member_list:
 
 		@i @member_list.0.up@ = @member_list.1.up@;
 		@i @member_list.1.className@ = @member_list.0.className@;
+
+		@i @member_list.0.usedMethods@ = @member_list.1.usedMethods@;
 	@}
 	| member_list method SEMICOLON
 	@{
@@ -126,6 +130,9 @@ member_list:
 
 		@i @member_list.1.className@ = @member_list.0.className@;
 		@i @method.className@ = @member_list.0.className@;
+
+		@i @method.usedMethodsIn@ = @member_list.1.usedMethods@;
+		@i @member_list.0.usedMethods@ = @method.usedMethodsOut@;
 	@}
 	;
 
@@ -137,6 +144,8 @@ method: type ID LEFT_PAREN pars RIGHT_PAREN m_stat_list
 
 		@i @m_stat_list.symtab@ = @pars.symtab_out@;
 		@i @m_stat_list.returnType@ = @type.bt@;
+
+		@i @method.usedMethodsOut@ = clist_add(@method.usedMethodsIn@, @ID.id@);
 
 		@sematic {
 			symtab_check_method_impl(@method.symtab@, @ID.id@, complex_type_init(@type.bt@, @pars.tl@), @ID.lineNr@);
