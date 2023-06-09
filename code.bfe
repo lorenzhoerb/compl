@@ -31,17 +31,17 @@ reg: OP_RETURN(num)                 # 1 #   writeReturnNum(kids[0]->val);
 reg: OP_RETURN(reg)                 # 1 #   writeReturnReg(kids[0]->regname);
 
 reg: OP_ADD(reg, num)               # 1 #   freeReg(regm, kids[0]->regname); bnode->regname = newReg(regm); writeOPNumRegDest("addq", kids[1]->val, kids[0]->regname, bnode->regname);
-reg: OP_MULT(reg, num)              # 1 #   bnode->regname = kids[0]->regname; writeOpNumReg("imulq", kids[0]->regname, kids[1]->val);
-reg: OP_OR(reg, num)                # 1 #   bnode->regname = kids[0]->regname; writeOpNumReg("or", kids[0]->regname, kids[1]->val);
+reg: OP_MULT(reg, num)              # 1 #   freeReg(regm, kids[0]->regname); bnode->regname = newReg(regm); writeOPNumRegDest("imulq", kids[1]->val, kids[0]->regname, bnode->regname);
+reg: OP_OR(reg, num)                # 1 #   freeReg(regm, kids[0]->regname); bnode->regname = newReg(regm); writeOPNumRegDest("or", kids[1]->val, kids[0]->regname, bnode->regname);
 
 reg: OP_ADD(num, reg)               # 1 #   freeReg(regm, kids[1]->regname); bnode->regname = newReg(regm); writeOPNumRegDest("addq", kids[0]->val, kids[1]->regname, bnode->regname);
-reg: OP_MULT(num, reg)              # 1 #   bnode->regname = kids[1]->regname; writeOpNumReg("imulq", kids[1]->regname, kids[0]->val);
-reg: OP_OR(num, reg)                # 1 #   bnode->regname = kids[1]->regname; writeOpNumReg("or", kids[1]->regname, kids[0]->val);
+reg: OP_MULT(num, reg)              # 1 #   freeReg(regm, kids[1]->regname); bnode->regname = newReg(regm); writeOPNumRegDest("imulq", kids[0]->val, kids[1]->regname, bnode->regname);
+reg: OP_OR(num, reg)                # 1 #   freeReg(regm, kids[1]->regname); bnode->regname = newReg(regm); writeOPNumRegDest("or", kids[0]->val, kids[1]->regname, bnode->regname);
 reg: OP_UNARY(num, reg)             # 1 #   bnode->regname = kids[1]->regname; writeNeg(kids[0]->val, kids[1]->regname);
 reg: OP_GREATER(num, reg)           # 1 #   bnode->regname = "rax"; writeGreaterThan(kids[0]->regname, kids[1]->regname);
 
 reg: OP_ADD(reg, reg)               # 1 #   freeReg(regm, kids[0]->regname); freeReg(regm, kids[1]->regname); bnode->regname = newReg(regm); writeOpRegRegDest("addq", kids[0]->regname, kids[1]->regname, bnode->regname);
-reg: OP_MULT(reg, reg)              # 1 #   bnode->regname = kids[0]->regname; writeOpRegReg("imulq", kids[0]->regname, kids[1]->regname);
+reg: OP_MULT(reg, reg)              # 1 #   freeReg(regm, kids[0]->regname); freeReg(regm, kids[1]->regname); bnode->regname = newReg(regm); writeOpRegRegDest("imulq", kids[0]->regname, kids[1]->regname, bnode->regname);
 reg: OP_OR(reg, reg)                # 1 #   bnode->regname = kids[0]->regname; writeOpRegReg("or", kids[0]->regname, kids[1]->regname);
 reg: OP_GREATER(reg, reg)           # 1 #   bnode->regname = "rax"; writeGreaterThan(kids[0]->regname, kids[1]->regname);
 

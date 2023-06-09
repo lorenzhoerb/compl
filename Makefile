@@ -48,7 +48,6 @@ test:
 	./test.sh
 
 testp:
-	make clean
 	make
 	./codea < tests/test4 > playground/ass.s
 	cd playground && make && ./a.out

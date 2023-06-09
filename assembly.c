@@ -1,4 +1,5 @@
 #include "assembly.h"
+#include <string.h>
 
 void defineClassSection(char *className, char **selectors, unsigned size) {
     printf(".data\n");
@@ -69,7 +70,9 @@ void writeReturnNum(int val) {
 }
 
 void writeReturnReg(char *regname) {
-    printf("movq %%%s, %%rax\n", regname);
+    if(strcmp(regname, "rax") != 0) {
+        printf("movq %%%s, %%rax\n", regname);
+    }
 }
 
 void writeDeclerationReg(int offset, char *regname) {
@@ -92,11 +95,26 @@ void writeLoadFromStack(int offset, char *destReg) {
 }
 
 void writeOpRegRegDest(char *op, char *reg1, char *reg2, char *dest) {
-    printf("movq %%%s, %%%s\n", reg2, dest);
-    printf("%s %%%s, %%%s\n", op, reg1, dest);
+    char *toDest;
+    if(strcmp(reg1, dest) == 0) {
+        toDest = reg2;
+    } else if(strcmp(reg2, dest) == 0) {
+        toDest = reg1;
+    } else {
+        printf("movq %%%s, %%%s\n", reg2, dest);
+        toDest = reg1;
+    }
+
+    if(strcmp(reg1, dest) != 0 && strcmp(reg2, dest) != 0) {
+    }
+    printf("%s %%%s, %%%s\n", op, toDest, dest);
 }
 
 void writeOPNumRegDest(char *op, int val, char *reg, char *dest) {
-    printf("movq $%d, %%%s\n", val, dest);
-    printf("%s %%%s, %%%s\n", op, reg, dest);
+    if(strcmp(reg, dest) == 0) {
+        printf("%s $%d, %%%s\n", op, val, dest);
+    } else {
+        printf("movq $%d, %%%s\n", val, dest);
+        printf("%s %%%s, %%%s\n", op, reg, dest);
+    }
 }
