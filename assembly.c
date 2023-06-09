@@ -79,11 +79,12 @@ void writeDeclerationReg(int offset, char *regname) {
     printf("movq %%%s, -%d(%%rbp)\n", regname, offsetToAddrOffset(offset));
 }
 
-void writeGreaterThan(char *reg1, char *reg2) {
+void writeGreaterThan(char *reg1, char *reg2, char *dest) {
+    char *bitRegDest = regToLowerBitReg(dest);
     printf("cmp %%%s, %%%s\n", reg2, reg1);
-    printf("setg %%al\n");
-    printf("and $1, %%rax\n");
-    writeNeg(-1, "rax");
+    printf("setg %%%s\n", bitRegDest);
+    printf("and $1, %%%s\n", dest);
+    writeNeg(-1, dest);
 }
 
 void writeNeg(int factor, char *regname) {
@@ -117,4 +118,43 @@ void writeOPNumRegDest(char *op, int val, char *reg, char *dest) {
         printf("movq $%d, %%%s\n", val, dest);
         printf("%s %%%s, %%%s\n", op, reg, dest);
     }
+}
+
+char *regToLowerBitReg(char *reg) {
+    if (strcmp(reg, "rdi") == 0) {
+        return "dil";
+    } else if (strcmp(reg, "rsi") == 0) {
+        return "sil";
+    } else if (strcmp(reg, "rdx") == 0) {
+        return "dl";
+    } else if (strcmp(reg, "rcx") == 0) {
+        return "cl";
+    } else if (strcmp(reg, "r8") == 0) {
+        return "r8b";
+    } else if (strcmp(reg, "r9") == 0) {
+        return "r9b";
+    } else if (strcmp(reg, "r10") == 0) {
+        return "r10b";
+    } else if (strcmp(reg, "rax") == 0) {
+        return "al";
+    }
+
+    // If no match, return the original string
+    return reg;
+}
+
+void writeGreaterThanNumReg(int val, char *reg, char *dest) {
+    char *bitRegDest = regToLowerBitReg(dest);
+    printf("cmp $%d, %%%s\n", val, reg);
+    printf("setl %%%s\n", bitRegDest); // invert greater to less because operands are switched
+    printf("and $1, %%%s\n", dest);
+    writeNeg(-1, dest);
+}
+
+void writeGreaterThanRegNum(char *reg, int val, char *dest) {
+    char *bitRegDest = regToLowerBitReg(dest);
+    printf("cmp $%d, %%%s\n", val, reg);
+    printf("setg %%%s\n", bitRegDest);
+    printf("and $1, %%%s\n", dest);
+    writeNeg(-1, dest);
 }

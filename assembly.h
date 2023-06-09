@@ -17,10 +17,13 @@ void writeOpRegReg(char *op, char *srcReg, char *dest);
 void writeReturnNum(int val);
 void writeReturnReg(char *regname);
 void writeDeclerationReg(int offset, char *regname);
-void writeGreaterThan(char *reg1, char *reg2);
+void writeGreaterThan(char *reg1, char *reg2, char *dest);
 void writeNeg(int factor, char *regname);
 void writeLoadFromStack(int offset, char *destReg);
 void writeOpRegRegDest(char *op, char *reg1, char *reg2, char *dest);
 void writeOPNumRegDest(char *op, int val, char *reg, char *dest);
+char *regToLowerBitReg(char *reg);
+void writeGreaterThanNumReg(int val, char *reg, char *dest);
+void writeGreaterThanRegNum(char *reg, int val, char *dest);
 
 #endif
