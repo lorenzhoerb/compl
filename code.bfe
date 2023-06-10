@@ -23,9 +23,9 @@ num: OP_OR(num, num)                # 1 #   bnode->val = kids[0]->val | kids[1]-
 num: OP_GREATER(num, num)           # 1 #   bnode->val = kids[0]->val > kids[1]->val ? -1 : 0;
 num: OP_HASH(num, num)              # 1 #   bnode->val = kids[0]->val != kids[1]->val ? -1 : 0;
 
-num: OP_ASSIGN(OP_ID, num)          # 1 #   writeDecleration(bnode->kids[0]->val, bnode->kids[1]->val);
+num: OP_ASSIGN(OP_ID, num)          # 1 #   writeDecleration(bnode->kids[0]->val, bnode->kids[0]->type, bnode->kids[1]->val);
 
-reg: OP_ASSIGN(OP_ID, reg)          # 1 #   writeDeclerationReg(bnode->kids[0]->val, bnode->kids[1]->regname);
+reg: OP_ASSIGN(OP_ID, reg)          # 1 #   writeDeclerationReg(bnode->kids[0]->val, bnode->kids[0]->type, bnode->kids[1]->regname);
 
 reg: OP_RETURN(num)                 # 1 #   writeReturnNum(kids[0]->val);
 reg: OP_RETURN(reg)                 # 1 #   writeReturnReg(kids[0]->regname);

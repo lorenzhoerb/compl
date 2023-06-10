@@ -270,7 +270,7 @@ stat:
 		@semantic symtab_check_assign(@stat.symtab@, @ID.id@, @expr.bt@, @ID.lineNr@);
 		@i @expr.symtab@ = @stat.symtab@;
 		@i @stat.symtab_out@ = @stat.symtab@;
-		@i @stat.n@ = newOperatorNode(OP_ASSIGN, newIdNode(@ID.id@, symtab_lookup_var_offset(@stat.symtab_out@, @ID.id@), LOC), @expr.n@);
+		@i @stat.n@ = newOperatorNode(OP_ASSIGN, newIdNode(@ID.id@, symtab_lookup_var_offset(@stat.symtab_out@, @ID.id@), resolveType(symtab_lookup_kind(@stat.symtab_out@, @ID.id@))), @expr.n@);
 
 		@i @stat.varCount@ = 0;
 	@}

@@ -403,11 +403,17 @@ void printLocalVars(symtab *symtab) {
 
 int symtab_lookup_var_offset(struct symbol_table *symtab, char *name) {
   sym_entry *entry = symtab_lookup(symtab, name);
+  if(entry == NULL) {
+    return -1;
+  }
   return entry->varOffset;
 }
 
 enum sym_kind symtab_lookup_kind(symtab *symtab, char *name) {
   sym_entry *entry = symtab_lookup(symtab, name);
+  if(entry == NULL) {
+    return 0;
+  }
   return entry->kind;
 }
 

@@ -46,8 +46,12 @@ void setupMethodStack(unsigned varCount) {
     }
 }
 
-void writeDecleration( int destOffset, int value) {
-    printf("movq $%d, -%d(%%rbp)\n", value, offsetToAddrOffset(destOffset));
+void writeDecleration(int destOffset, int type, int value) {
+    if(type == VAR) {
+        printf("movq $%d, -%d(%%rbp)\n", value, offsetToAddrOffset(destOffset));
+    } else if(type == OBJ) {
+        printf("movq $%d, %d(%%rdi)\n", value, offsetToAddrOffset(destOffset));
+    }
 }
 
 void genReturn() {
@@ -77,8 +81,12 @@ void writeReturnReg(char *regname) {
     }
 }
 
-void writeDeclerationReg(int offset, char *regname) {
-    printf("movq %%%s, -%d(%%rbp)\n", regname, offsetToAddrOffset(offset));
+void writeDeclerationReg(int offset, int type, char *regname) {
+    if(type == VAR) {
+        printf("movq %%%s, -%d(%%rbp)\n", regname, offsetToAddrOffset(offset));
+    } else if(type == OBJ) {
+        printf("movq %%%s, %d(%%rdi)\n", regname, offsetToAddrOffset(offset));
+    }
 }
 
 void writeGreaterThan(char *reg1, char *reg2, char *dest) {
