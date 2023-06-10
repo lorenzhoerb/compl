@@ -1,6 +1,6 @@
-codea
+codeb
 *.o
-codea_iburg.c
+codeb_iburg.c
 oxout.*
 tests
 lex.yy.c
