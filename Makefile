@@ -45,7 +45,7 @@ oxout.tab.o: oxout.tab.c gentree.h
 	gcc -c -o oxout.tab.o oxout.tab.c
 
 clean:
-	rm -rf *.tab.* lex.yy.c parser oxout.* *.o codea_iburg.c $(NAME)
+	rm -rf *.tab.* lex.yy.c parser oxout.* *.o $(NAME)_iburg.c $(NAME)
 
 test:
 	./test.sh
