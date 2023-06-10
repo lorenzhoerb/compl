@@ -46,11 +46,13 @@ void setupMethodStack(unsigned varCount) {
     }
 }
 
-void writeDecleration(int destOffset, int type, int value) {
+void writeDecleration(int destOffset, int type, int value, regm_t *regm) {
     if(type == VAR) {
         printf("movq $%d, -%d(%%rbp)\n", value, offsetToAddrOffset(destOffset));
     } else if(type == OBJ) {
         printf("movq $%d, %d(%%rdi)\n", value, offsetToAddrOffset(destOffset));
+    } else if(type == PAR) {
+        printf("movq $%d, %%%s\n", value, regm->regs[destOffset]);
     }
 }
 
@@ -81,11 +83,13 @@ void writeReturnReg(char *regname) {
     }
 }
 
-void writeDeclerationReg(int offset, int type, char *regname) {
+void writeDeclerationReg(int offset, int type, char *regname, regm_t *regm) {
     if(type == VAR) {
         printf("movq %%%s, -%d(%%rbp)\n", regname, offsetToAddrOffset(offset));
     } else if(type == OBJ) {
         printf("movq %%%s, %d(%%rdi)\n", regname, offsetToAddrOffset(offset));
+    } else if(type == PAR) {
+        printf("movq %%%s, %%%s\n", regname, regm->regs[offset]);
     }
 }
 

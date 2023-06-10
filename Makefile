@@ -52,5 +52,5 @@ test:
 
 testp:
 	make
-	./codea < tests/test4 > playground/ass.s
+	./codeb < tests/test4 > playground/ass.s
 	cd playground && make && ./a.out

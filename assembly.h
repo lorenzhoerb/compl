@@ -5,19 +5,20 @@
 #include "clist.h"
 #include "symt.h"
 #include "gentree.h"
+#include "reg.h"
 
 void defineClassSection(char *className, symtab *symtab, clist_t *usedMethods);
 void defineObject(char *objName, char *className);
 void implementMethod(char *className, char *methodName, unsigned varCount);
 void setupMethodStack(unsigned varCount);
 void genReturn(void);
-void writeDecleration(int destOffset, int type, int value);
+void writeDecleration(int destOffset, int type, int value, regm_t *regm);
 int offsetToAddrOffset(int offset);
 void writeOpNumReg(char *op, char *regname, int val);
 void writeOpRegReg(char *op, char *srcReg, char *dest);
 void writeReturnNum(int val);
 void writeReturnReg(char *regname);
-void writeDeclerationReg(int offset, int type,char *regname);
+void writeDeclerationReg(int offset, int type,char *regname, regm_t *regm);
 void writeGreaterThan(char *reg1, char *reg2, char *dest);
 void writeNeg(int factor, char *regname);
 void writeLoadFromStack(int offset, char *destReg);
