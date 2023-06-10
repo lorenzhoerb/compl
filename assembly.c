@@ -206,3 +206,17 @@ void writeNotDest(char *srcReg, char *destReg) {
     }
     printf("not %%%s\n", destReg);
 }
+
+void writeNewObject(char *className, unsigned objVarCount, char *destReg) {
+    printf("lea %s, %%%s\n", className, destReg); // init className
+    printf("movq %%%s, (%%r15)\n", destReg); // init className
+    printf("movq %%r15, %%%s\n", destReg);
+
+    // initialize object variables with 0 (null)
+    int i;
+    for(i = 0; i < objVarCount; i++) {
+        printf("movq $0, %d(%%r15)\n", offsetToAddrOffset(i));
+    }
+    // move heap pointer
+    printf("addq $%d, %%r15\n", (objVarCount + 1)*8);
+}

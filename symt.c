@@ -146,6 +146,7 @@ sym_entry *sym_entry_init(char *name, enum sym_kind kind,
   entry->lineNr = lineNr;
   entry->next = NULL;
   entry->varOffset = 0;
+  entry->objVars = 0;
   return entry;
 }
 
@@ -197,11 +198,15 @@ symtab *symtab_insert_local_var(symtab *symtab, char *name, enum basic_type bt, 
   return symtab;
 }
 
-symtab *symtab_insert_obj_var(symtab *symtab, char *name, enum basic_type bt, unsigned offset, unsigned lineNr) {
+symtab *symtab_insert_obj_var(symtab *symtab, char *name, char *classReference, enum basic_type bt, unsigned offset, unsigned lineNr) {
   struct complex_type *ct = complex_type_init(bt, NULL);
   symtab = symtab_insert(symtab, name, OBJ_VAR, ct, lineNr);
   sym_entry *entry = symtab_lookup(symtab, name);
   entry->varOffset = offset;
+
+  sym_entry *classEntry = symtab_lookup(symtab, classReference);
+  classEntry->objVars++;
+
   return symtab;
 }
 
@@ -421,4 +426,10 @@ bool symtab_is_kind(symtab *symtab, char *name, enum sym_kind kind) {
   sym_entry *entry = symtab_lookup(symtab, name);
   if(entry == NULL) return true;
   return entry->kind == kind;
+}
+
+int symtab_lookup_obj_var_count(symtab *symtab, char *name) {
+  sym_entry *entry = symtab_lookup(symtab, name);
+  if(entry == NULL) return 0;
+  return entry->objVars;
 }

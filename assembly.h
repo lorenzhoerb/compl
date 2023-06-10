@@ -32,5 +32,10 @@ void writeNotEqualsRegNum(char *reg, int val, char *dest);
 void writeLoadFromObjVar(unsigned offset, char *reg);
 void writeNegDest(char *srcReg, char *destReg);
 void writeNotDest(char *srcReg, char *destReg);
+/**
+* Creates a new object in the heap. Reserves memory for the object variables
+* and saves the address of the object to destReg.
+*/
+void writeNewObject(char *calssName, unsigned objVarCount, char *destReg);
 
 #endif

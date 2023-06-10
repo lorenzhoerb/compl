@@ -15,6 +15,7 @@ typedef struct symbol_entry {
   unsigned lineNr;
   struct symbol_entry *next;
   int varOffset;
+  int objVars;
 } sym_entry;
 
 typedef struct symbol_table {
@@ -163,6 +164,7 @@ bool symtab_is_kind(symtab *symtab, char *name, enum sym_kind kind);
 
 enum sym_kind symtab_lookup_kind(symtab *symtab, char *name);
 
-symtab *symtab_insert_obj_var(symtab *symtab, char *name, enum basic_type bt, unsigned offset, unsigned lineNr);
+symtab *symtab_insert_obj_var(symtab *symtab, char *name, char *classReference, enum basic_type bt, unsigned offset, unsigned lineNr);
 
+int symtab_lookup_obj_var_count(symtab *symtab, char *name);
 #endif

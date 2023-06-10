@@ -31,3 +31,10 @@ treenode *newIdNode(char *id, int offset, enum VAR_TYPE type) {
     newNode->type = type;
     return newNode;
 }
+
+treenode *newObjectNode(char *className, int objVars) {
+    treenode *newNode = newOperatorNode(OP_NEW, NULL, NULL);
+    newNode->id = className;
+    newNode->val = objVars;
+    return newNode;
+}

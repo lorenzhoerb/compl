@@ -102,6 +102,7 @@ class: CLASS ID member_list END
 		@i @class.symtab_out@ = symtab_insert(@class.symtab@, @ID.id@, CLASS_NAME, NULL, @ID.lineNr@);
 		@i @member_list.symtab@ = symtab_namespace(@class.symtab_in@);
 		@i @member_list.className@ = @ID.id@;
+		@i @member_list.className@ = @ID.id@;
 		@codegen defineClassSection(@ID.id@, @member_list.up@, @member_list.usedMethods@);
 	@}
 	;
@@ -118,7 +119,7 @@ member_list:
 	| member_list type ID SEMICOLON
 	@{
 		@i @member_list.0.objVarOffset@ = @member_list.1.objVarOffset@ + 1;
-		@i @member_list.1.symtab@ = symtab_insert_obj_var(@member_list.0.symtab@, @ID.id@, @type.bt@, @member_list.1.objVarOffset@, @ID.lineNr@);
+		@i @member_list.1.symtab@ = symtab_insert_obj_var(@member_list.0.symtab@, @ID.id@, @member_list.0.className@, @type.bt@, @member_list.1.objVarOffset@, @ID.lineNr@);
 
 		@i @member_list.0.up@ = @member_list.1.up@;
 		@i @member_list.1.className@ = @member_list.0.className@;
@@ -429,7 +430,7 @@ expr:
 
 		@i @expr.bt@ = OBJECT_T;
 
-		@i @expr.n@ = NULL;
+		@i @expr.n@ = newObjectNode(@ID.id@, symtab_lookup_obj_var_count(@expr.symtab@, @ID.id@));
 	@}
 	| term
 	@{

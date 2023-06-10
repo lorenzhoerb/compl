@@ -40,6 +40,7 @@ typedef treenode *treenodep;
 treenode *newOperatorNode(int op, treenode *left, treenode *right);
 treenode *newNumNode(long num);
 treenode *newIdNode(char *id, int offset, enum VAR_TYPE type);
+treenode *newObjectNode(char *className, int objVars);
 
 enum {
     OP_REG = 1,
@@ -54,8 +55,8 @@ enum {
     OP_HASH = 10,
     OP_ASSIGN = 11,
     OP_RETURN = 12,
-    OP_NOT = 13
-
+    OP_NOT = 13,
+    OP_NEW = 14
 };
 
 #endif
