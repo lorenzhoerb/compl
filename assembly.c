@@ -180,3 +180,17 @@ void writeNotEqualsRegNum(char *reg, int val, char *dest) {
 void writeLoadFromObjVar(unsigned offset, char *reg) {
     printf("movq %d(%%rdi), %%%s\n", offsetToAddrOffset(offset), reg);
 }
+
+void writeNegDest(char *srcReg, char *destReg) {
+    if(strcmp(srcReg, destReg) != 0) {
+        printf("movq %%%s, %%%s\n", srcReg, destReg);
+    }
+    printf("neg %%%s\n", destReg);
+}
+
+void writeNotDest(char *srcReg, char *destReg) {
+    if(strcmp(srcReg, destReg) != 0) {
+        printf("movq %%%s, %%%s\n", srcReg, destReg);
+    }
+    printf("not %%%s\n", destReg);
+}

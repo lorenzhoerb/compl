@@ -28,5 +28,7 @@ void writeGreaterThanRegNum(char *reg, int val, char *dest);
 void writeNotEqualsRegReg(char *reg1, char *reg2, char *dest);
 void writeNotEqualsRegNum(char *reg, int val, char *dest);
 void writeLoadFromObjVar(unsigned offset, char *reg);
+void writeNegDest(char *srcReg, char *destReg);
+void writeNotDest(char *srcReg, char *destReg);
 
 #endif
