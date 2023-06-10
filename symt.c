@@ -197,6 +197,14 @@ symtab *symtab_insert_local_var(symtab *symtab, char *name, enum basic_type bt, 
   return symtab;
 }
 
+symtab *symtab_insert_obj_var(symtab *symtab, char *name, enum basic_type bt, unsigned offset, unsigned lineNr) {
+  struct complex_type *ct = complex_type_init(bt, NULL);
+  symtab = symtab_insert(symtab, name, OBJ_VAR, ct, lineNr);
+  sym_entry *entry = symtab_lookup(symtab, name);
+  entry->varOffset = offset;
+  return symtab;
+}
+
 bool symtab_contains(symtab *symtab, char *name) {
   symtab_itr *itr = symtab_iter(symtab);
   sym_entry *entry;

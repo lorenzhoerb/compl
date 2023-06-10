@@ -81,7 +81,11 @@ char *loadId(treenode *idNode) {
 
     if(type == LOC) {
         writeLoadFromStack(offset, reg);
-    }
+    } else if(type == OBJ) {
+        writeLoadFromObjVar(offset, reg);
+    } 
+
+
    return reg; 
 }
 

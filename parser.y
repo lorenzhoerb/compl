@@ -44,7 +44,7 @@ extern void invoke_burm(NODEPTR_TYPE root, unsigned parCount);
 @attributes { struct symbol_table *symtab; struct symbol_table *symtab_out;} selector
 @attributes { struct symbol_table *symtab; struct symbol_table *out; struct selector_list *sl;} program
 @attributes { struct symbol_table *symtab;} start
-@attributes { struct symbol_table *symtab; struct symbol_table *up; char *className; struct clist *usedMethods;} member_list 
+@attributes { struct symbol_table *symtab; struct symbol_table *up; char *className; struct clist *usedMethods; unsigned objVarOffset;} member_list 
 
 @attributes { struct symbol_table *symtab; struct symbol_table *symtab_out; int returnType; struct s_node *n; unsigned varCount;} stat 
 
@@ -111,11 +111,14 @@ member_list:
 	@{ 
 		@i @member_list.up@ = @member_list.symtab@;
 
+		@i @member_list.objVarOffset@ = 0;
+
 		@i @member_list.usedMethods@ = clist_init();
 	@}
 	| member_list type ID SEMICOLON
 	@{
-		@i @member_list.1.symtab@ = symtab_insert(@member_list.0.symtab@, @ID.id@, OBJ_VAR, complex_type_init(@type.bt@, NULL), @ID.lineNr@);
+		@i @member_list.0.objVarOffset@ = @member_list.1.objVarOffset@ + 1;
+		@i @member_list.1.symtab@ = symtab_insert_obj_var(@member_list.0.symtab@, @ID.id@, @type.bt@, @member_list.1.objVarOffset@, @ID.lineNr@);
 
 		@i @member_list.0.up@ = @member_list.1.up@;
 		@i @member_list.1.className@ = @member_list.0.className@;
@@ -127,6 +130,8 @@ member_list:
 		@i @member_list.1.symtab@ = @member_list.0.symtab@;
 		@i @member_list.0.up@ = @member_list.1.up@;
 		@i @method.symtab@ = @member_list.1.up@;
+
+		@i @member_list.0.objVarOffset@ = @member_list.1.objVarOffset@;
 
 		@i @member_list.1.className@ = @member_list.0.className@;
 		@i @method.className@ = @member_list.0.className@;
@@ -597,7 +602,7 @@ enum VAR_TYPE resolveType(enum sym_kind kind) {
 		case PARAMETER:
 			return PAR;
 		case OBJ_VAR:
-			return VAR;
+			return OBJ;
 		default:
 			fprintf(stderr, "Error: could not resolve type sym_kind: '%d'\n", kind);
 			exit(3);

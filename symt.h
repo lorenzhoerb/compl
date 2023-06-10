@@ -162,4 +162,7 @@ void printLocalVars(symtab *symtab);
 bool symtab_is_kind(symtab *symtab, char *name, enum sym_kind kind);
 
 enum sym_kind symtab_lookup_kind(symtab *symtab, char *name);
+
+symtab *symtab_insert_obj_var(symtab *symtab, char *name, enum basic_type bt, unsigned offset, unsigned lineNr);
+
 #endif

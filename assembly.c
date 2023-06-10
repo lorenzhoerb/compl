@@ -176,3 +176,7 @@ void writeNotEqualsRegNum(char *reg, int val, char *dest) {
     printf("and $1, %%%s\n", dest);
     writeNeg(-1, dest);
 }
+
+void writeLoadFromObjVar(unsigned offset, char *reg) {
+    printf("movq %d(%%rdi), %%%s\n", offsetToAddrOffset(offset), reg);
+}
