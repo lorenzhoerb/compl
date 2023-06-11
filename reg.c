@@ -59,3 +59,10 @@ char *newReg(regm_t *regm) {
     }
     return NULL;
 }
+
+char *getReg(unsigned index) {
+    if(index < 0 || index >= REG_SIZE) {
+        return NULL;
+    }
+    return regs[index];
+}

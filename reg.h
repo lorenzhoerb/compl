@@ -34,4 +34,9 @@ void freeReg(regm_t *regm, char *reg);
 */
 char *newReg(regm_t *regm);
 
+/**
+* Gets the register at index
+*/
+char *getReg(unsigned index);
+
 #endif

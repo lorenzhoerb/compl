@@ -35,6 +35,8 @@ void writeNotDest(char *srcReg, char *destReg);
 void writeLabel(unsigned labelId);
 void writeJumpLabel(unsigned labelId);
 void writeIfJump(char *reg, unsigned val);
+void writePrepareParForCall(unsigned parIndex, char *srcReg);
+void writePrepareParForCallNum(unsigned parIndex, int val);
 /**
 * Creates a new object in the heap. Reserves memory for the object variables
 * and saves the address of the object to destReg.

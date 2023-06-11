@@ -233,3 +233,15 @@ void writeIfJump(char *reg, unsigned val) {
     printf("cmp $0, %%%s\n", reg);
     printf("je L%d\n", val);
 }
+
+void writePrepareParForCall(unsigned parIndex, char *srcReg) {
+    char *oldReg = getReg(parIndex);
+    printf("pushq %%%s\n", oldReg); // save register
+    printf("movq %%%s, %%%s\n", srcReg, oldReg);
+}
+
+void writePrepareParForCallNum(unsigned parIndex, int val) {
+    char *oldReg = getReg(parIndex);
+    printf("pushq %%%s\n", oldReg); // save register
+    printf("movq $%d, %%%s\n", val, oldReg);
+}

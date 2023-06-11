@@ -59,6 +59,7 @@ enum {
     OP_NOT = 13,
     OP_NEW = 14,
     OP_IF = 15,
+    OP_CALL_PAR = 16
 };
 
 #endif

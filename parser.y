@@ -32,7 +32,7 @@ unsigned getLabelId();
 @attributes { struct symbol_table *symtab; int returnType; unsigned varCount; unsigned parCount;} cond 
 @attributes { struct symbol_table *symtab; int returnType; unsigned varCount; unsigned parCount; unsigned endLabelId; unsigned startLabelId; struct s_node *n;} guarded 
 @attributes { struct symbol_table *symtab; int returnType; unsigned varCount; unsigned startLabelId; unsigned endLabelId; unsigned parCount;} guarded_list 
-@attributes { struct symbol_table *symtab;} expr_list
+@attributes { struct symbol_table *symtab; unsigned parIndex;} expr_list
 @attributes { struct symbol_table *symtab; char *className; struct clist *usedMethodsIn; struct clist *usedMethodsOut;} method
 @attributes { int bt;} type
 @attributes { int bt; struct s_node *n; struct s_node *termNode;} notexpr
@@ -636,17 +636,22 @@ term:
 	@{
 		@i @expr.symtab@ = @term.symtab@;
 		@i @expr_list.symtab@ = @term.symtab@;
+		@i @expr_list.parIndex@ = 1;
 		@i @term.bt@ = symtab_lookup_return_type(@term.symtab@, @ID.id@);
 		@i @term.n@ = NULL;
+		@codegen invoke_burm(newOperatorNode(OP_CALL_PAR, newNumNode(0), @expr.n@), 2);
 	@}
 	;
 
 expr_list:
 	/* empty */
-	| expr_list ',' expr
+	| ',' expr expr_list 
 	@{
 		@i @expr_list.1.symtab@ = @expr_list.0.symtab@;
 		@i @expr.0.symtab@ = @expr_list.0.symtab@;
+		@i @expr_list.1.parIndex@ = @expr_list.0.parIndex@;
+
+		@codegen invoke_burm(newOperatorNode(OP_CALL_PAR, newNumNode(@expr_list.0.parIndex@), @expr.n@), symtab_par_count(@expr_list.symtab@));
 	@}
 	;
 

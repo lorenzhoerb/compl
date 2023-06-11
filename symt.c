@@ -433,3 +433,15 @@ int symtab_lookup_obj_var_count(symtab *symtab, char *name) {
   if(entry == NULL) return 0;
   return entry->objVars;
 }
+
+int symtab_par_count(symtab *symtab) {
+  int count = 0;
+  symtab_itr *itr = symtab_iter(symtab);
+  sym_entry *entry;
+  for (entry = symtab_next(itr); entry != NULL; entry = symtab_next(itr)) {
+    if (entry->kind == PARAMETER) {
+      count++;
+    }
+  }
+  return count;
+}

@@ -167,4 +167,6 @@ enum sym_kind symtab_lookup_kind(symtab *symtab, char *name);
 symtab *symtab_insert_obj_var(symtab *symtab, char *name, char *classReference, enum basic_type bt, unsigned offset, unsigned lineNr);
 
 int symtab_lookup_obj_var_count(symtab *symtab, char *name);
+
+int symtab_par_count(symtab *symtab);
 #endif
