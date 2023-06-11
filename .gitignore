@@ -1,5 +1,7 @@
-codeb
+gesamt
 *.o
+gesamt_iburg.c
+codeb
 codeb_iburg.c
 oxout.*
 tests

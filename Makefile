@@ -1,4 +1,4 @@
-NAME=codeb
+NAME=gesamt
 LEX=flex
 OBJECTS = lex.yy.o oxout.tab.o symt.o $(NAME)_iburg.o gentree.o assembly.o reg.o clist.o
 
@@ -52,5 +52,5 @@ test:
 
 testp:
 	make
-	./codeb < tests/test4 > playground/ass.s
+	./$(NAME) < tests/test4 > playground/ass.s
 	cd playground && make && ./a.out
