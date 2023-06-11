@@ -11,7 +11,7 @@
 
 %start stat
 %term OP_REG = 1 OP_NUM = 2 OP_ID = 3 OP_ADD = 4 OP_MULT = 5 OP_NEG = 6 OP_UNARY = 7 
-%term OP_OR = 8 OP_GREATER = 9 OP_HASH = 10 OP_ASSIGN = 11 OP_RETURN = 12 OP_NOT = 13 OP_NEW = 14
+%term OP_OR = 8 OP_GREATER = 9 OP_HASH = 10 OP_ASSIGN = 11 OP_RETURN = 12 OP_NOT = 13 OP_NEW = 14 OP_IF = 15
 
 %%
 
@@ -56,6 +56,9 @@ num: OP_NOT(num)                    # 1 #   bnode->val = ~kids[0]->val;
 reg: OP_NEG(reg)                    # 1 #   freeAndNewReg(bnode, true, false); writeNegDest(kids[0]->regname, bnode->regname);
 reg: OP_NOT(reg)                    # 1 #   freeAndNewReg(bnode, true, false); writeNotDest(kids[0]->regname, bnode->regname);
 reg: OP_NEW                         # 1 #   bnode->regname = newReg(regm); writeNewObject(bnode->id, bnode->val, bnode->regname); freeReg(regm, bnode->regname);
+
+reg: OP_IF(num)                     # 1 #   if(kids[0]->val == 0) writeJumpLabel(bnode->val);
+reg: OP_IF(reg)                     # 1 #   freeReg(regm, kids[0]->regname); writeIfJump(kids[0]->regname, bnode->val);
 
 num: OP_NUM                         # 1 #   
 reg: OP_ID                          # 1 #   bnode->regname = loadId(bnode);

@@ -38,3 +38,9 @@ treenode *newObjectNode(char *className, int objVars) {
     newNode->val = objVars;
     return newNode;
 }
+
+treenode *newIfNode(treenode *condition, unsigned endIfLabelId) {
+    treenode *newNode = newOperatorNode(OP_IF, condition, NULL);
+    newNode->val = endIfLabelId;
+    return newNode;    
+}

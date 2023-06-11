@@ -16,21 +16,22 @@ int yyerror(char* s);
 %token OBJECT INT CLASS END RETURN COND CONTINUE BREAK NOT NULLKEY
 %token NUM ID
 %start start
-
 %{
-
 enum VAR_TYPE resolveType(enum sym_kind kind);
-
-%}
-
-%{
 extern void invoke_burm(NODEPTR_TYPE root, unsigned parCount);
+unsigned labelId = 0;
+/**
+* Returns a new and individual label id
+*/
+unsigned getLabelId();
 %}
 
 @attributes { char* id; unsigned lineNr; } ID
 @attributes { unsigned n; } NUM
 @attributes { struct symbol_table *symtab; struct symbol_table *symtab_in; struct symbol_table *symtab_out; struct selector_list *sl;} class 
-@attributes { struct symbol_table *symtab; int returnType; unsigned varCount;} guarded guarded_list cond 
+@attributes { struct symbol_table *symtab; int returnType; unsigned varCount; unsigned parCount;} cond 
+@attributes { struct symbol_table *symtab; int returnType; unsigned varCount; unsigned parCount; unsigned endLabelId; unsigned startLabelId; struct s_node *n;} guarded 
+@attributes { struct symbol_table *symtab; int returnType; unsigned varCount; unsigned startLabelId; unsigned endLabelId; unsigned parCount;} guarded_list 
 @attributes { struct symbol_table *symtab;} expr_list
 @attributes { struct symbol_table *symtab; char *className; struct clist *usedMethodsIn; struct clist *usedMethodsOut;} method
 @attributes { int bt;} type
@@ -46,12 +47,14 @@ extern void invoke_burm(NODEPTR_TYPE root, unsigned parCount);
 @attributes { struct symbol_table *symtab;} start
 @attributes { struct symbol_table *symtab; struct symbol_table *up; char *className; struct clist *usedMethods; unsigned objVarOffset;} member_list 
 
-@attributes { struct symbol_table *symtab; struct symbol_table *symtab_out; int returnType; struct s_node *n; unsigned varCount;} stat 
+@attributes { struct symbol_table *symtab; struct symbol_table *symtab_out; int returnType; struct s_node *n; unsigned varCount; unsigned parCount;} stat 
 
 @attributes { struct symbol_table *symtab; int returnType; struct s_node *n;} return
+@attributes {unsigned endLabelId; unsigned startLabelId; unsigned endGuardLabel; } escape
+
 
 @attributes { struct symbol_table *symtab; int returnType; struct s_node *n;} stats
-@attributes {struct symbol_table *symtab; int returnType; unsigned varCount; } g_stat_list
+@attributes {struct symbol_table *symtab; int returnType; unsigned varCount; unsigned parCount; unsigned endGuardLabel; unsigned endLabelId; unsigned startLabelId;} g_stat_list
 @attributes {struct symbol_table *symtab; int returnType; unsigned varCount; unsigned parCount;} m_stat_list
 
 @traversal @preorder semantic
@@ -218,6 +221,8 @@ m_stat_list:
 		@i @m_stat_list.varCount@ = @stat.varCount@ + @m_stat_list.1.varCount@;
 		@i @m_stat_list.1.parCount@ = @m_stat_list.0.parCount@;
 
+		@i @stat.parCount@= @m_stat_list.parCount@;
+
 		@codegen if(@stat.n@ != NULL) invoke_burm(@stat.n@, @m_stat_list.parCount@);
 	@}
 	;
@@ -226,6 +231,13 @@ g_stat_list:
 	escape
 	@{
 		@i @g_stat_list.varCount@ = 0;
+		@i @g_stat_list.endGuardLabel@ = @escape.endGuardLabel@;
+
+		@i @escape.startLabelId@ = @g_stat_list.startLabelId@;
+		@i @escape.endLabelId@ = @g_stat_list.endLabelId@;
+		@i @escape.endGuardLabel@ = getLabelId();
+
+
 	@}
 	| stat SEMICOLON g_stat_list
 	@{
@@ -235,6 +247,15 @@ g_stat_list:
 		@i @g_stat_list.1.symtab@ = @stat.symtab_out@;
 
 		@i @g_stat_list.varCount@ = @stat.varCount@ + @g_stat_list.1.varCount@;
+
+		@i @stat.parCount@ = @g_stat_list.0.parCount@;
+		@i @g_stat_list.1.parCount@ = @g_stat_list.0.parCount@;
+		@i @g_stat_list.0.endGuardLabel@ = @g_stat_list.1.endGuardLabel@;
+
+		@i @g_stat_list.1.startLabelId@ = @g_stat_list.0.startLabelId@;
+		@i @g_stat_list.1.endLabelId@ = @g_stat_list.0.endLabelId@;
+
+		@codegen invoke_burm(@stat.n@, @g_stat_list.parCount@);
 	@}
 	;
 
@@ -257,6 +278,8 @@ stat:
 		@i @cond.returnType@ = @stat.returnType@;
 		@i @stat.n@ = NULL;
 		@i @stat.varCount@ = @cond.varCount@;
+
+		@i @cond.parCount@ = @stat.parCount@;
 	@}
 	| type ID ASSIGN expr
 	@{
@@ -287,11 +310,17 @@ stat:
 
 cond: COND guarded_list END
 	@{
+		@i @guarded_list.startLabelId@ = getLabelId();
+		@i @guarded_list.endLabelId@ = getLabelId();
+
 		@i @guarded_list.symtab@ = @cond.symtab@;
 		
 		@i @guarded_list.returnType@ = @cond.returnType@;
 
 		@i @cond.varCount@ = @guarded_list.varCount@;
+		@i @guarded_list.parCount@ = @cond.parCount@;
+
+		@codegen writeLabel(@guarded_list.startLabelId@); 
 	@}
 	;
 
@@ -299,8 +328,10 @@ guarded_list:
 	/* empty */
 	@{
 		@i @guarded_list.varCount@ = 0;
+		@codegen writeLabel(@guarded_list.endLabelId@);
+
 	@}
-	| guarded_list guarded SEMICOLON 
+	| guarded SEMICOLON guarded_list 
 	@{
 		@i @guarded.symtab@ = symtab_namespace(@guarded_list.0.symtab@);
 		@i @guarded_list.1.symtab@ = @guarded_list.0.symtab@;
@@ -309,6 +340,16 @@ guarded_list:
 		@i @guarded.returnType@ = @guarded_list.0.returnType@;
 
 		@i @guarded_list.varCount@ = @guarded_list.1.varCount@ + @guarded.varCount@;
+
+
+		@i @guarded_list.1.parCount@ = @guarded_list.0.parCount@;
+		@i @guarded.parCount@ = @guarded_list.0.parCount@;
+
+		@i @guarded_list.1.endLabelId@ = @guarded_list.0.endLabelId@;
+		@i @guarded_list.1.startLabelId@ = @guarded_list.0.startLabelId@;
+
+		@i @guarded.endLabelId@ = @guarded_list.0.endLabelId@;
+		@i @guarded.startLabelId@ = @guarded_list.0.startLabelId@;
 	@}
 	;
 
@@ -322,6 +363,14 @@ guarded:
 
 		@i @guarded.varCount@ = @g_stat_list.varCount@;
 
+		@i @g_stat_list.parCount@ = @guarded.parCount@;
+
+		@i @g_stat_list.endLabelId@ = @guarded.endLabelId@;
+		@i @g_stat_list.startLabelId@ = @guarded.startLabelId@;
+
+		@i @guarded.n@ = newIfNode(@expr.n@, @g_stat_list.endGuardLabel@);
+		@codegen if(@guarded.n@ != NULL) invoke_burm(@guarded.n@, @guarded.parCount@);
+
 		@semantic {
 			if(@expr.bt@ != INT_T) {
 				fprintf(stderr, "Type of expression in guarded must be type int\n");
@@ -329,6 +378,7 @@ guarded:
 			}
 		};
 	@}
+		// access to endGuardLabel
 	| ARROW g_stat_list
 	@{
 		@i @g_stat_list.symtab@ = @guarded.symtab@;
@@ -336,12 +386,32 @@ guarded:
 		@i @g_stat_list.returnType@ = @guarded.returnType@;
 
 		@i @guarded.varCount@ = @g_stat_list.varCount@;
+
+		@i @g_stat_list.parCount@ = @guarded.parCount@;
+
+		@i @g_stat_list.endLabelId@ = @guarded.endLabelId@;
+		@i @g_stat_list.startLabelId@ = @guarded.startLabelId@;
+
+		@i @guarded.n@ = NULL;
 	@}
 	;
 
 escape:
 	CONTINUE
+	@{
+		@codegen {
+			writeJumpLabel(@escape.startLabelId@);
+			writeLabel(@escape.endGuardLabel@);
+		}
+		
+	@}
 	| BREAK
+	@{
+		@codegen {
+			writeJumpLabel(@escape.endLabelId@);
+			writeLabel(@escape.endGuardLabel@);
+		}
+	@}
 	;
 
 return: RETURN expr
@@ -615,6 +685,10 @@ enum VAR_TYPE resolveType(enum sym_kind kind) {
 			fprintf(stderr, "Error: could not resolve type sym_kind: '%d'\n", kind);
 			exit(3);
 	}
+}
+
+unsigned getLabelId() {
+	return labelId++;
 }
 
 int yyerror(char *e)

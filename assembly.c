@@ -220,3 +220,16 @@ void writeNewObject(char *className, unsigned objVarCount, char *destReg) {
     // move heap pointer
     printf("addq $%d, %%r15\n", (objVarCount + 1)*8);
 }
+
+void writeLabel(unsigned labelId) {
+    printf("L%d:\n", labelId);
+}
+
+void writeJumpLabel(unsigned labelId) {
+    printf("jmp L%d\n", labelId);
+}
+
+void writeIfJump(char *reg, unsigned val) {
+    printf("cmp $0, %%%s\n", reg);
+    printf("je L%d\n", val);
+}
