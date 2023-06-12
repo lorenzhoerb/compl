@@ -445,3 +445,15 @@ int symtab_par_count(symtab *symtab) {
   }
   return count;
 }
+
+unsigned symtab_get_selector_index(symtab *symtab, char *selectorName) {
+  int index = -1;
+   symtab_itr *itr = symtab_iter(symtab);
+  sym_entry *entry;
+  for (entry = symtab_next(itr); entry != NULL; entry = symtab_next(itr)) {
+    if (entry->kind == METHOD && strcmp(entry->name, selectorName) == 0) {
+      index++;
+    }
+  }
+  return index;
+}

@@ -42,6 +42,7 @@ treenode *newNumNode(long num);
 treenode *newIdNode(char *id, int offset, enum VAR_TYPE type);
 treenode *newObjectNode(char *className, int objVars);
 treenode *newIfNode(treenode *condition, unsigned endIfLabelId);
+treenode *newFuncPar(unsigned parIndex, treenode *exprNode);
 
 enum {
     OP_REG = 1,
@@ -59,7 +60,13 @@ enum {
     OP_NOT = 13,
     OP_NEW = 14,
     OP_IF = 15,
-    OP_CALL_PAR = 16
+    OP_CALL_PAR = 16,
+    OP_CALL = 17,
+    OP_FUNC_PAR = 18,
+    OP_FUNC_M = 19,
+    OP_CON_PAR = 20,
+    OP_CON_PAR_NONE = 21,
+    OP_RESTORE_CALL = 22
 };
 
 #endif

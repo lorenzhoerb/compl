@@ -169,4 +169,6 @@ symtab *symtab_insert_obj_var(symtab *symtab, char *name, char *classReference, 
 int symtab_lookup_obj_var_count(symtab *symtab, char *name);
 
 int symtab_par_count(symtab *symtab);
+
+unsigned symtab_get_selector_index(symtab *symtab, char *selectorName);
 #endif

@@ -44,3 +44,9 @@ treenode *newIfNode(treenode *condition, unsigned endIfLabelId) {
     newNode->val = endIfLabelId;
     return newNode;    
 }
+
+treenode *newFuncPar(unsigned parIndex, treenode *exprNode) {
+    treenode *newNode = newOperatorNode(OP_FUNC_PAR, exprNode, NULL);
+    newNode->val = parIndex;
+    return newNode; 
+}

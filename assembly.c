@@ -245,3 +245,17 @@ void writePrepareParForCallNum(unsigned parIndex, int val) {
     printf("pushq %%%s\n", oldReg); // save register
     printf("movq $%d, %%%s\n", val, oldReg);
 }
+
+void writeRestoreParametersFromStack(unsigned parCount) {
+    int i;
+    for(i = parCount - 1; i >= 0; i--) {
+        char *parDest = getReg(i);
+        printf("pop %%%s\n", parDest);
+    }
+}
+
+void writeCall(char *objAdrReg, char *tmpReg, unsigned selectorOffset) {
+    printf("movq (%%rdi), %%%s\n", tmpReg); //move class address from obj table to tmp
+    printf("movq %d(%%%s), %%%s\n", selectorOffset * 8, tmpReg, tmpReg);
+    printf("call *%%%s\n", tmpReg);
+}

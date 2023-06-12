@@ -12,12 +12,14 @@
 %start stat
 %term OP_REG = 1 OP_NUM = 2 OP_ID = 3 OP_ADD = 4 OP_MULT = 5 OP_NEG = 6 OP_UNARY = 7 
 %term OP_OR = 8 OP_GREATER = 9 OP_HASH = 10 OP_ASSIGN = 11 OP_RETURN = 12 OP_NOT = 13 OP_NEW = 14 OP_IF = 15
-%term OP_CALL_PAR = 16
+%term OP_CALL_PAR = 16 OP_CALL = 17 OP_FUNC_PAR = 18 OP_FUNC_M = 19 OP_CON_PAR = 20 OP_CON_PAR_NONE = 21 OP_RESTORE_CALL = 22
 
 %%
 
 stat: num
 stat: reg
+stat: par
+stat: con
 
 num: OP_MULT(num, num)              # 1 #   bnode->val=kids[0]->val * kids[1]->val;
 num: OP_ADD(num, num)               # 1 #   bnode->val=kids[0]->val + kids[1]->val;
@@ -64,8 +66,14 @@ reg: OP_IF(reg)                     # 1 #   freeReg(regm, kids[0]->regname); wri
 num: OP_NUM                         # 1 #   
 reg: OP_ID                          # 1 #   bnode->regname = loadId(bnode);
 
-reg: OP_CALL_PAR(num, reg)          # 1 #   writePrepareParForCall(kids[0]->val, kids[1]->regname);
-reg: OP_CALL_PAR(num, num)          # 1 #   writePrepareParForCallNum(kids[0]->val, kids[1]->val);
+reg: OP_RESTORE_CALL(reg, num)      # 1 #   bnode->regname = kids[0]->regname; writeRestoreParametersFromStack(kids[1]->val);
+reg: OP_CALL(con, num)              # 1 #   bnode->regname = newReg(regm); writeCall(kids[0]->regname, bnode->regname, kids[1]->val); freeReg(regm, bnode->regname); bnode->regname = "rax";
+
+par: OP_FUNC_PAR(reg)               # 1 #   writePrepareParForCall(bnode->val, kids[0]->regname);
+par: OP_FUNC_PAR(num)               # 1 #   writePrepareParForCallNum(bnode->val, kids[0]->val);
+
+con: OP_CON_PAR(par, con)           # 1 # 
+con: OP_CON_PAR_NONE                # 1 #
 %%
 
 extern treenode *root;
